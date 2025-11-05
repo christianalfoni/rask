@@ -1,0 +1,16 @@
+{
+  "name": "snabbdom-components-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @snabbdom-components/demo dev",
+    "build:core": "pnpm --filter @snabbdom-components/core build",
+    "build:demo": "pnpm --filter @snabbdom-components/demo build",
+    "build": "pnpm build:core && pnpm build:demo",
+    "preview": "pnpm --filter @snabbdom-components/demo preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
