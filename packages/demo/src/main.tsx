@@ -1,24 +1,33 @@
-import { createContext, render, createState } from "@snabbdom-components/core";
+import {
+  createContext,
+  render,
+  createState,
+  createSuspense,
+  Suspense,
+} from "@snabbdom-components/core";
 
 import "./style.css";
 
 function Counter() {
-  const state = appContext.get();
-  return () => <h4>Nested {state.count}</h4>;
-}
+  const values = createSuspense({
+    test: new Promise<string>((resolve) =>
+      setTimeout(() => resolve("Hello World"), 5000)
+    ),
+  });
 
-export const appContext = createContext<{ count: number }>();
+  return () => <h4>Nested {values.test}</h4>;
+}
 
 function App() {
   const state = createState({
     count: 0,
   });
 
-  appContext.set(state);
-
   return () => (
     <h1 onClick={() => state.count++}>
-      Hello World ({state.count}) <Counter />
+      <Suspense fallback={<span>Loading...</span>}>
+        <Counter />
+      </Suspense>
     </h1>
   );
 }
