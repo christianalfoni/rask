@@ -1,6 +1,6 @@
 import { thunk, type VNode, type VNodeData } from "snabbdom";
 
-import { Observer } from "./observation";
+import { getCurrentObserver, Observer, Signal } from "./observation";
 import { jsx, patch } from "./render";
 import { createState } from "./createState";
 
@@ -15,6 +15,7 @@ export type ComponentInstance = {
   hostNode?: VNode;
   observer: Observer;
   reactiveProps: object;
+  renderError: unknown;
 };
 
 const componentStack: ComponentInstance[] = [];
@@ -75,6 +76,10 @@ const hook = {
   init(thunk: VNode) {
     const component = thunk.data!.fn! as unknown as Component<any>;
     const args = thunk.data!.args!;
+    // Implement a value to signals, then optionally create an error signal
+    const renderErrorSignal = new Signal();
+    let renderError: boolean = false;
+
     const executeRender = () => {
       const stopObserving = instance.observer.observe();
       const renderResult = render();
@@ -108,6 +113,17 @@ const hook = {
         ...args![0],
         children: args![1],
       }),
+      get renderError() {
+        const observer = getCurrentObserver();
+        if (observer) {
+          observer.subscribeSignal(renderErrorSignal);
+        }
+        return renderError;
+      },
+      set renderError(value) {
+        renderError = value;
+        renderErrorSignal.notify();
+      },
     };
 
     componentStack.unshift(instance);
