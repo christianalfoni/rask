@@ -21,9 +21,9 @@ export function jsx(type: any, props: any, key?: any): any {
   const finalProps = key !== undefined ? { ...restProps, key } : restProps;
   const finalChildren = Array.isArray(children)
     ? children
-    : children
-    ? [children]
-    : [];
+    : children === undefined
+    ? []
+    : [children];
 
   return internalJsx(type, finalProps, finalChildren);
 }

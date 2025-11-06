@@ -3,7 +3,6 @@ import { thunk, type VNode, type VNodeData } from "snabbdom";
 import { Observer } from "./observation";
 import { jsx, patch } from "./render";
 import { createState } from "./createState";
-import { SuspensePromise } from "./suspense";
 
 export type Component<P> = ((props: P) => () => VNode) | (() => () => VNode);
 
@@ -16,8 +15,6 @@ export type ComponentInstance = {
   hostNode?: VNode;
   observer: Observer;
   reactiveProps: object;
-  notifyAsync: (promise: SuspensePromise<any>) => void;
-  onAsync: (cb: (promise: SuspensePromise<any>) => void) => void;
 };
 
 const componentStack: ComponentInstance[] = [];
@@ -58,18 +55,22 @@ const hook = {
     vnode.data.componentInstance.onCleanups.forEach((cb) => cb());
   },
   prepatch(oldVnode: VNode, thunk: VNode): void {
+    copyToThunk(oldVnode, thunk);
     console.log("PREPATCH", thunk.data!.componentInstance.component.name);
     componentStack.unshift(thunk.data!.componentInstance);
-    copyToThunk(oldVnode, thunk);
   },
   postpatch(_: VNode, newNode: VNode) {
-    console.log("POSTPATCH", newNode.data!.componentInstance.component.name);
+    const componentInstance = newNode.data!.componentInstance;
+    console.log("POSTPATCH", componentInstance.component.name);
     componentStack.shift();
     const props = newNode.data!.args![0];
+    const children = newNode.data!.args![1];
 
     for (const key in props) {
-      newNode.data!.componentInstance.reactiveProps[key] = props[key];
+      componentInstance.reactiveProps[key] = props[key];
     }
+
+    componentInstance.reactiveProps.children = children;
   },
   init(thunk: VNode) {
     const component = thunk.data!.fn! as unknown as Component<any>;
@@ -86,11 +87,12 @@ const hook = {
             insert: hook.insert,
             destroy: hook.destroy,
           },
+          "data-name": component.name,
         },
         Array.isArray(renderResult) ? renderResult : [renderResult]
       );
     };
-    let asyncListener: ((promise: SuspensePromise<any>) => void) | undefined;
+
     const instance: ComponentInstance = {
       parent: getCurrentComponent(),
       component,
@@ -99,30 +101,15 @@ const hook = {
       onCleanups: [],
       observer: new Observer(() => {
         const renderResult = executeRender();
+
         instance.hostNode = patch(instance.hostNode!, renderResult);
       }),
       reactiveProps: createState({
         ...args![0],
         children: args![1],
       }),
-      notifyAsync(promise) {
-        if (asyncListener) {
-          asyncListener(promise);
-        } else if (this.parent) {
-          this.parent.notifyAsync(promise);
-        } else {
-          throw new Error("No suspense boundary found");
-        }
-      },
-      onAsync(cb) {
-        asyncListener = cb;
-      },
     };
-    console.log(
-      "INIT",
-      instance.component.name,
-      getCurrentComponent()?.component.name
-    );
+
     componentStack.unshift(instance);
     const render = component(instance.reactiveProps);
     instance.hostNode = executeRender();

@@ -15,8 +15,12 @@ export function createState<T extends object>(state: T): T {
         return state[key];
       },
       set(value) {
-        state[key] = value;
-        signal.notify();
+        const hasChanged = state[key] !== value;
+
+        if (hasChanged) {
+          state[key] = value;
+          signal.notify();
+        }
       },
     });
   }

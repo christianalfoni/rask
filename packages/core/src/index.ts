@@ -1,5 +1,5 @@
 export { render } from "./render";
 export { onMount, onCleanup } from "./component";
-export { createContext } from "./context";
+export { createContext } from "./createContext";
 export { createState } from "./createState";
-export { createSuspense, Suspense } from "./suspense";
+export { createAsyncState } from "./createAsyncState";

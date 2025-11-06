@@ -4,6 +4,7 @@ import {
   propsModule,
   styleModule,
   eventListenersModule,
+  attributesModule,
   type VNode,
   h,
 } from "snabbdom";
@@ -15,6 +16,7 @@ export const patch = init([
   propsModule, // for setting properties on DOM elements
   styleModule, // handles styling on elements with support for animations
   eventListenersModule, // attaches event listeners
+  attributesModule,
 ]);
 
 export function render(vnode: VNode, container: HTMLElement) {
