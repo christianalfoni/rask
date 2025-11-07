@@ -78,7 +78,7 @@ describe('Integration Tests', () => {
     }
 
     function Parent() {
-      ThemeContext.set({ theme: 'dark' });
+      ThemeContext.inject({ theme: 'dark' });
       return () => <Child />;
     }
 

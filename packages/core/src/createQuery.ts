@@ -21,6 +21,29 @@ export type Query<T> = QueryState<T> & {
   fetch(force?: boolean): void;
 };
 
+/**
+ * Creates a reactive query that manages data fetching with loading and error states.
+ *
+ * @warning **Do not destructure the returned reactive object!** Destructuring breaks reactivity.
+ * Access properties directly in your render function instead.
+ *
+ * @example
+ * // ❌ Bad - destructuring loses reactivity
+ * function Component() {
+ *   const query = createQuery(() => fetchUsers());
+ *   const { isPending, data, error } = query; // Don't do this!
+ *   return () => <div>{isPending ? "Loading..." : data.length}</div>; // Won't update!
+ * }
+ *
+ * // ✅ Good - access properties directly
+ * function Component() {
+ *   const query = createQuery(() => fetchUsers());
+ *   return () => <div>{query.isPending ? "Loading..." : query.data.length}</div>;
+ * }
+ *
+ * @param fetcher - Function that returns a promise with the data to fetch
+ * @returns Reactive query object with isPending, data, error properties and fetch method
+ */
 export function createQuery<T>(fetcher: () => Promise<T>): Query<T> {
   const state = createState<QueryState<T>>({
     isPending: true,

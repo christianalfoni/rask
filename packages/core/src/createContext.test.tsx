@@ -5,7 +5,7 @@ import { render } from './render';
 describe('createContext', () => {
   it('should create a context object', () => {
     const context = createContext<{ value: string }>();
-    expect(context).toHaveProperty('set');
+    expect(context).toHaveProperty('inject');
     expect(context).toHaveProperty('get');
   });
 
@@ -13,7 +13,7 @@ describe('createContext', () => {
     const ThemeContext = createContext<{ theme: string }>();
 
     function Parent() {
-      ThemeContext.set({ theme: 'dark' });
+      ThemeContext.inject({ theme: 'dark' });
       return () => <Child />;
     }
 
@@ -36,7 +36,7 @@ describe('createContext', () => {
     const ThemeContext = createContext<{ theme: string }>();
 
     function GrandParent() {
-      ThemeContext.set({ theme: 'light' });
+      ThemeContext.inject({ theme: 'light' });
       return () => <Parent />;
     }
 
@@ -81,8 +81,8 @@ describe('createContext', () => {
     const ThemeContext = createContext<{ theme: string }>();
 
     expect(() => {
-      ThemeContext.set({ theme: 'dark' });
-    }).toThrow('You can not set context out component setup');
+      ThemeContext.inject({ theme: 'dark' });
+    }).toThrow('You can not inject context outside component setup');
   });
 
   it('should throw error when getting context outside component', () => {
@@ -90,14 +90,14 @@ describe('createContext', () => {
 
     expect(() => {
       ThemeContext.get();
-    }).toThrow('You can not set context out component setup');
+    }).toThrow('You can not get context outside component setup');
   });
 
   it('should allow overriding context in nested components', () => {
     const ThemeContext = createContext<{ theme: string }>();
 
     function GrandParent() {
-      ThemeContext.set({ theme: 'light' });
+      ThemeContext.inject({ theme: 'light' });
       return () => (
         <div>
           <Parent />
@@ -107,7 +107,7 @@ describe('createContext', () => {
     }
 
     function Parent() {
-      ThemeContext.set({ theme: 'dark' });
+      ThemeContext.inject({ theme: 'dark' });
       return () => <ChildOfParent />;
     }
 
@@ -140,8 +140,8 @@ describe('createContext', () => {
     const UserContext = createContext<{ name: string }>();
 
     function Parent() {
-      ThemeContext.set({ theme: 'dark' });
-      UserContext.set({ name: 'Alice' });
+      ThemeContext.inject({ theme: 'dark' });
+      UserContext.inject({ name: 'Alice' });
       return () => <Child />;
     }
 
@@ -170,8 +170,8 @@ describe('createContext', () => {
     const ArrayContext = createContext<string[]>();
 
     function Parent() {
-      NumberContext.set(42);
-      ArrayContext.set(['a', 'b', 'c']);
+      NumberContext.inject(42);
+      ArrayContext.inject(['a', 'b', 'c']);
       return () => <Child />;
     }
 

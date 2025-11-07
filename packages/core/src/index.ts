@@ -7,3 +7,4 @@ export { ErrorBoundary } from "./error";
 export { createQuery } from "./createQuery";
 export { createMutation } from "./createMutation";
 export { createRef } from "./createRef";
+export { createView } from "./createView";

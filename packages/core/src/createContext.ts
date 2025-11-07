@@ -1,12 +1,36 @@
 import { getCurrentComponent, type ComponentInstance } from "./component";
 
+/**
+ * Creates a context object for providing and consuming values across component trees.
+ *
+ * @warning **Do not destructure context values returned by context.get()!** The returned
+ * value may be a reactive object, and destructuring breaks reactivity.
+ *
+ * @example
+ * // ❌ Bad - destructuring context value
+ * const ThemeContext = createContext<{ color: string }>();
+ *
+ * function Consumer() {
+ *   const theme = ThemeContext.get();
+ *   const { color } = theme; // Don't do this!
+ *   return () => <div style={{ color }}>Text</div>; // Won't update!
+ * }
+ *
+ * // ✅ Good - access properties directly
+ * function Consumer() {
+ *   const theme = ThemeContext.get();
+ *   return () => <div style={{ color: theme.color }}>Text</div>;
+ * }
+ *
+ * @returns Context object with inject() and get() methods
+ */
 export function createContext<T extends object>() {
   const context = {
-    set(value: T) {
+    inject(value: T) {
       const currentComponent = getCurrentComponent();
 
       if (!currentComponent) {
-        throw new Error("You can not set context out component setup");
+        throw new Error("You can not inject context outside component setup");
       }
 
       if (!currentComponent.contexts) {
@@ -19,7 +43,7 @@ export function createContext<T extends object>() {
       let currentComponent: ComponentInstance | null = getCurrentComponent();
 
       if (!currentComponent) {
-        throw new Error("You can not set context out component setup");
+        throw new Error("You can not get context outside component setup");
       }
 
       while (currentComponent) {

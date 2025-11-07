@@ -22,6 +22,29 @@ export type Mutation<T> = MutationState<T> & {
   mutate(params: T): void;
 };
 
+/**
+ * Creates a reactive mutation that manages async mutations with loading and error states.
+ *
+ * @warning **Do not destructure the returned reactive object!** Destructuring breaks reactivity.
+ * Access properties directly in your render function instead.
+ *
+ * @example
+ * // ❌ Bad - destructuring loses reactivity
+ * function Component() {
+ *   const mutation = createMutation((params) => updateUser(params));
+ *   const { isPending, error } = mutation; // Don't do this!
+ *   return () => <button disabled={isPending}>Save</button>; // Won't update!
+ * }
+ *
+ * // ✅ Good - access properties directly
+ * function Component() {
+ *   const mutation = createMutation((params) => updateUser(params));
+ *   return () => <button disabled={mutation.isPending}>Save</button>;
+ * }
+ *
+ * @param mutator - Function that performs the mutation and returns a promise
+ * @returns Reactive mutation object with isPending, params, error properties and mutate method
+ */
 export function createMutation<T>(
   mutator: (params: T) => Promise<T>
 ): Mutation<T> {

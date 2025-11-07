@@ -4,6 +4,23 @@ import { getCurrentObserver, Observer, Signal } from "./observation";
 import { jsx, patch, ChildNode } from "./render";
 import { createState } from "./createState";
 
+/**
+ * Component function type. Components receive reactive props that should not be destructured.
+ *
+ * @warning **Do not destructure props!** Props are wrapped in a reactive proxy, and destructuring
+ * breaks reactivity. This is the same rule as Solid.js.
+ *
+ * @example
+ * // ❌ Bad - destructuring props loses reactivity
+ * function MyComponent({ count, name }) {
+ *   return () => <div>{count} {name}</div>; // Won't update!
+ * }
+ *
+ * // ✅ Good - access props directly in render
+ * function MyComponent(props) {
+ *   return () => <div>{props.count} {props.name}</div>; // Reactive!
+ * }
+ */
 export type Component<P> = ((props: P) => () => VNode) | (() => () => VNode);
 
 export type ComponentInstance = {
