@@ -100,7 +100,7 @@ describe("VDOM Keys", () => {
     const App = () => {
       const state = createState({
         order: ["first", "second", "third"],
-        values: { first: "First", second: "Second", third: "Third" },
+        values: { first: "First", second: "Second", third: "Third" } as Record<string, string>,
       });
       stateFn = state;
       return () =>

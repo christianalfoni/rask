@@ -7,15 +7,17 @@ function App() {
   const ref = createRef<HTMLDivElement>();
 
   return () => (
-    <div ref={ref}>
-      <h1 onClick={() => state.count++}>Counter {state.count}</h1>
-      <button onClick={() => state.items.push("bar")}>Add</button>
-      <ul>
-        {state.items.map((item, index) => (
-          <li onClick={() => state.items.splice(index, 1)}>{item}</li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <div ref={ref}>
+        <h1 onClick={() => state.count++}>Counter {state.count}</h1>
+        <button onClick={() => state.items.push("bar")}>Add</button>
+        <ul>
+          {state.items.map((item, index) => (
+            <li onClick={() => state.items.splice(index, 1)}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }
 

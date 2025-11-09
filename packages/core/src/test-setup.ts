@@ -39,7 +39,7 @@ export function renderComponent(vnode: VNode) {
     },
     // Re-render with new vnode
     rerender: (newVnode: VNode) => {
-      newVnode.patch(currentVnode);
+      (currentVnode as any).patch(newVnode);
     },
   };
 }

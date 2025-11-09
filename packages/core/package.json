@@ -34,8 +34,5 @@
     "jsdom": "^27.1.0",
     "typescript": "^5.7.3",
     "vitest": "^4.0.7"
-  },
-  "dependencies": {
-    "snabbdom": "^3.6.3"
   }
 }

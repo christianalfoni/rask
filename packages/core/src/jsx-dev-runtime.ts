@@ -1,5 +1,5 @@
 // JSX dev runtime - adds jsxDEV for development mode
-export { jsx, jsxs, Fragment, FragmentSymbol } from "./jsx-runtime";
+export { jsx, jsxs, Fragment } from "./jsx-runtime";
 export type { JSX } from "./jsx-runtime";
 
 // In development mode, TypeScript uses jsxDEV instead of jsx
