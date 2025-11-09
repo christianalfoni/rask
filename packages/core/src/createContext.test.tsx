@@ -82,10 +82,10 @@ describe("createContext", () => {
 
     expect(() => {
       ThemeContext.inject({ theme: "dark" });
-    }).toThrow("You can not inject context outside component setup");
+    }).toThrow("No current root");
   });
 
-  it.only("should throw error when getting context outside component", () => {
+  it("should throw error when getting context outside component", () => {
     const ThemeContext = createContext<{ theme: string }>();
 
     expect(() => {

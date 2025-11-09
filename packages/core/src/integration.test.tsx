@@ -215,7 +215,7 @@ describe("Integration Tests", () => {
     expect(document.querySelector(".content")).toBeNull();
   });
 
-  it.only("should handle list rendering", async () => {
+  it("should handle list rendering", async () => {
     function TodoList() {
       const state = createState({ items: ["Item 1", "Item 2"] });
 
