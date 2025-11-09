@@ -49,7 +49,7 @@ export abstract class AbstractVNode {
 
     throw new Error("There is no parent element for this VNode");
   }
-  private canPatch(oldNode: VNode, newNode: VNode): boolean {
+  protected canPatch(oldNode: VNode, newNode: VNode): boolean {
     // Must be same constructor type
     if (oldNode.constructor !== newNode.constructor) {
       return false;

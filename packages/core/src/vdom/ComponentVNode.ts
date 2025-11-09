@@ -1,7 +1,5 @@
-import { createState } from "../createState";
 import { getCurrentObserver, Observer, Signal } from "../observation";
 import { AbstractVNode } from "./AbstractVNode";
-import { ElementVNode } from "./ElementVNode";
 import { FragmentVNode } from "./FragmentVNode";
 import { RootVNode } from "./RootVNode";
 import { Props, VNode } from "./types";
@@ -49,6 +47,7 @@ export type ComponentInstance = {
 };
 
 import { currentRoot } from "./RootVNode";
+import { ElementVNode } from "./ElementVNode";
 
 export function getCurrentComponent() {
   if (!currentRoot) {
@@ -150,9 +149,21 @@ export class ComponentVNode extends AbstractVNode {
       observer: new Observer(() => {
         this.root?.setAsCurrent();
         const newChildren = executeRender();
+        const prevChildren = this.children;
         this.children = this.patchChildren(newChildren);
+        // Typically components return a single element, which does
+        // not require the parent to apply elements to the DOM again
+        const canSelfUpdate =
+          prevChildren.length === 1 &&
+          this.children.length === 1 &&
+          prevChildren[0] instanceof ElementVNode &&
+          this.children[0] instanceof ElementVNode &&
+          this.canPatch(prevChildren[0], this.children[0]);
 
-        this.parent?.rerender();
+        if (!canSelfUpdate) {
+          this.parent?.rerender();
+        }
+
         this.root?.flushLifecycle();
         this.root?.clearCurrent();
       }),
