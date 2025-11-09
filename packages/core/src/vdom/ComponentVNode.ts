@@ -8,6 +8,16 @@ import {
 import { ElementVNode } from "./ElementVNode";
 import { FragmentVNode } from "./FragmentVNode";
 import { Props, VNode } from "./types";
+import { normalizeChildren } from "./utils";
+
+export type ComponentChild =
+  | VNode
+  | string
+  | null
+  | number
+  | undefined
+  | boolean;
+export type ComponentChildren = ComponentChild | ComponentChild[];
 
 /**
  * Component function type. Components receive reactive props that should not be destructured.
@@ -27,8 +37,8 @@ import { Props, VNode } from "./types";
  * }
  */
 export type Component<P extends Props> =
-  | ((props: P) => () => VNode)
-  | (() => () => VNode);
+  | ((props: P) => () => ComponentChildren)
+  | (() => () => ComponentChildren);
 
 export type ComponentInstance = {
   parent?: VNode;
@@ -89,7 +99,7 @@ export class ComponentVNode extends AbstractVNode {
 
     const executeRender = (): VNode[] => {
       const stopObserving = instance.observer.observe();
-      let renderResult: VNode = new FragmentVNode([]);
+      let renderResult: ComponentChildren = new FragmentVNode([]);
       try {
         renderResult = render();
       } catch (error) {
@@ -98,7 +108,7 @@ export class ComponentVNode extends AbstractVNode {
         stopObserving();
       }
 
-      return Array.isArray(renderResult) ? renderResult : [renderResult];
+      return normalizeChildren(renderResult);
     };
 
     const instance = (this.instance = {
@@ -183,9 +193,9 @@ export class ComponentVNode extends AbstractVNode {
     }
   }
   unmount() {
+    this.children.forEach((child) => child.unmount());
     queueUnmount(() => {
       this.instance!.onCleanups.forEach((cb) => cb());
-      this.children.forEach((child) => child.unmount());
     });
   }
 }

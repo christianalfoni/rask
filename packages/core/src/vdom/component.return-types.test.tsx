@@ -1,76 +1,83 @@
 import { describe, it, expect } from "vitest";
-import { ComponentVNode } from "./ComponentVNode";
-import { jsx } from "./index";
+import { jsx, render } from "./index";
 import { createState } from "../createState";
+import { Fragment } from "./FragmentVNode";
 
 describe("Component Return Types", () => {
   describe("Static Return Values", () => {
     it("should handle component returning a single element", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => jsx("div", { children: "Hello" });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements).toHaveLength(1);
-      expect(elements[0]).toBeInstanceOf(HTMLDivElement);
-      expect(elements[0].textContent).toBe("Hello");
+      expect(container.children).toHaveLength(1);
+      expect(container.children[0]).toBeInstanceOf(HTMLDivElement);
+      expect(container.children[0].textContent).toBe("Hello");
     });
 
     it("should handle component returning a text string", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => "Hello World";
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements).toHaveLength(1);
-      expect(elements[0]).toBeInstanceOf(Text);
-      expect(elements[0].textContent).toBe("Hello World");
+      expect(container.childNodes).toHaveLength(1);
+      expect(container.childNodes[0]).toBeInstanceOf(Text);
+      expect(container.textContent).toBe("Hello World");
     });
 
     it("should handle component returning a number", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => 42;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements).toHaveLength(1);
-      expect(elements[0].textContent).toBe("42");
+      expect(container.childNodes).toHaveLength(1);
+      expect(container.textContent).toBe("42");
     });
 
     it("should handle component returning null", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => null;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
       // Null should render as empty fragment or empty array
-      expect(elements).toBeDefined();
+      expect(container.childNodes.length).toBe(0);
     });
 
     it("should handle component returning undefined", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => undefined;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
       // Undefined should render as empty fragment or empty array
-      expect(elements).toBeDefined();
+      expect(container.childNodes.length).toBe(0);
     });
 
     it("should handle component returning a fragment with multiple children", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () =>
-          jsx("Fragment", {
+          jsx(Fragment, {
             children: [
               jsx("div", { children: "First" }),
               jsx("div", { children: "Second" }),
@@ -79,13 +86,14 @@ describe("Component Return Types", () => {
           });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements.length).toBeGreaterThanOrEqual(3);
+      expect(container.children.length).toBeGreaterThanOrEqual(3);
     });
 
     it("should handle component returning an array of elements", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => [
           jsx("span", { children: "A" }),
@@ -94,13 +102,14 @@ describe("Component Return Types", () => {
         ];
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements.length).toBeGreaterThanOrEqual(3);
+      expect(container.children.length).toBeGreaterThanOrEqual(3);
     });
 
     it("should handle component returning nested components", () => {
+      const container = document.createElement("div");
+
       const InnerComponent = () => {
         return () => jsx("span", { children: "Inner" });
       };
@@ -109,40 +118,42 @@ describe("Component Return Types", () => {
         return () => jsx(InnerComponent, {});
       };
 
-      const componentVNode = jsx(OuterComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(OuterComponent, {}), container);
 
-      expect(elements).toHaveLength(1);
-      expect(elements[0].textContent).toBe("Inner");
+      expect(container.children).toHaveLength(1);
+      expect(container.textContent).toBe("Inner");
     });
 
     it("should handle component returning boolean false", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => false;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
       // False should render as empty or be filtered out
-      expect(elements).toBeDefined();
+      expect(container.childNodes.length).toBe(0);
     });
 
     it("should handle component returning boolean true", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => true;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
       // True should render as empty or be filtered out
-      expect(elements).toBeDefined();
+      expect(container.childNodes.length).toBe(0);
     });
   });
 
   describe("Dynamic Return Values", () => {
     it("should handle component switching from element to string", async () => {
+      const container = document.createElement("div");
       let stateFn: { showElement: boolean } | undefined;
 
       const MyComponent = () => {
@@ -150,68 +161,65 @@ describe("Component Return Types", () => {
         stateFn = state;
 
         return () =>
-          state.showElement
-            ? jsx("div", { children: "Element" })
-            : "Just text";
+          state.showElement ? jsx("div", { children: "Element" }) : "Just text";
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements[0]).toBeInstanceOf(HTMLDivElement);
+      expect(container.children[0]).toBeInstanceOf(HTMLDivElement);
 
       stateFn!.showElement = false;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const updatedElements = componentVNode.getElements();
-      expect(updatedElements[0]).toBeInstanceOf(Text);
-      expect(updatedElements[0].textContent).toBe("Just text");
+      expect(container.childNodes[0]).toBeInstanceOf(Text);
+      expect(container.textContent).toBe("Just text");
     });
 
     it("should handle component switching from null to element", async () => {
+      const container = document.createElement("div");
       let stateFn: { show: boolean } | undefined;
 
       const MyComponent = () => {
         const state = createState({ show: false });
         stateFn = state;
 
-        return () =>
-          state.show ? jsx("div", { children: "Visible" }) : null;
+        return () => (state.show ? jsx("div", { children: "Visible" }) : null);
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.childNodes.length).toBe(0);
 
       stateFn!.show = true;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements.length).toBeGreaterThan(0);
-      expect(elements[0].textContent).toBe("Visible");
+      expect(container.children.length).toBeGreaterThan(0);
+      expect(container.textContent).toBe("Visible");
     });
 
     it("should handle component switching from element to null", async () => {
+      const container = document.createElement("div");
       let stateFn: { show: boolean } | undefined;
 
       const MyComponent = () => {
         const state = createState({ show: true });
         stateFn = state;
 
-        return () =>
-          state.show ? jsx("div", { children: "Visible" }) : null;
+        return () => (state.show ? jsx("div", { children: "Visible" }) : null);
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(1);
 
       stateFn!.show = false;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements).toBeDefined();
+      expect(container.childNodes.length).toBe(0);
     });
 
     it("should handle component switching between different element types", async () => {
+      const container = document.createElement("div");
       let stateFn: { type: "div" | "span" | "p" } | undefined;
 
       const MyComponent = () => {
@@ -223,25 +231,23 @@ describe("Component Return Types", () => {
         return () => jsx(state.type, { children: "Content" });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements[0]).toBeInstanceOf(HTMLDivElement);
+      expect(container.children[0]).toBeInstanceOf(HTMLDivElement);
 
       stateFn!.type = "span";
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const spanElements = componentVNode.getElements();
-      expect(spanElements[0]).toBeInstanceOf(HTMLSpanElement);
+      expect(container.children[0]).toBeInstanceOf(HTMLSpanElement);
 
       stateFn!.type = "p";
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const pElements = componentVNode.getElements();
-      expect(pElements[0]).toBeInstanceOf(HTMLParagraphElement);
+      expect(container.children[0]).toBeInstanceOf(HTMLParagraphElement);
     });
 
     it("should handle component switching from single element to array", async () => {
+      const container = document.createElement("div");
       let stateFn: { multiple: boolean } | undefined;
 
       const MyComponent = () => {
@@ -257,17 +263,18 @@ describe("Component Return Types", () => {
             : jsx("div", { children: "Single" });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(1);
 
       stateFn!.multiple = true;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements.length).toBeGreaterThanOrEqual(2);
+      expect(container.children.length).toBeGreaterThanOrEqual(2);
     });
 
     it("should handle component switching from array to single element", async () => {
+      const container = document.createElement("div");
       let stateFn: { multiple: boolean } | undefined;
 
       const MyComponent = () => {
@@ -283,18 +290,19 @@ describe("Component Return Types", () => {
             : jsx("div", { children: "Single" });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(2);
 
       stateFn!.multiple = false;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements).toHaveLength(1);
-      expect(elements[0].textContent).toBe("Single");
+      expect(container.children).toHaveLength(1);
+      expect(container.textContent).toBe("Single");
     });
 
     it("should handle component dynamically changing array length", async () => {
+      const container = document.createElement("div");
       let stateFn: { count: number } | undefined;
 
       const MyComponent = () => {
@@ -307,23 +315,23 @@ describe("Component Return Types", () => {
           );
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(2);
 
       stateFn!.count = 5;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements.length).toBeGreaterThanOrEqual(5);
+      expect(container.children.length).toBe(5);
 
       stateFn!.count = 1;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const reducedElements = componentVNode.getElements();
-      expect(reducedElements).toHaveLength(1);
+      expect(container.children.length).toBe(1);
     });
 
     it("should handle component switching between string and number", async () => {
+      const container = document.createElement("div");
       let stateFn: { value: string | number } | undefined;
 
       const MyComponent = () => {
@@ -335,19 +343,18 @@ describe("Component Return Types", () => {
         return () => state.value;
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements[0].textContent).toBe("Hello");
+      expect(container.textContent).toBe("Hello");
 
       stateFn!.value = 42;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const updatedElements = componentVNode.getElements();
-      expect(updatedElements[0].textContent).toBe("42");
+      expect(container.textContent).toBe("42");
     });
 
     it("should handle component conditionally returning component or element", async () => {
+      const container = document.createElement("div");
       let stateFn: { useComponent: boolean } | undefined;
 
       const InnerComponent = () => {
@@ -364,18 +371,20 @@ describe("Component Return Types", () => {
             : jsx("div", { children: "Element" });
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children[0]).toBeInstanceOf(HTMLSpanElement);
+      expect(container.textContent).toBe("Component");
 
       stateFn!.useComponent = false;
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements[0]).toBeInstanceOf(HTMLDivElement);
-      expect(elements[0].textContent).toBe("Element");
+      expect(container.children[0]).toBeInstanceOf(HTMLDivElement);
+      expect(container.textContent).toBe("Element");
     });
 
     it("should handle rapid switching between return types", async () => {
+      const container = document.createElement("div");
       let stateFn: { type: "element" | "string" | "null" } | undefined;
 
       const MyComponent = () => {
@@ -395,37 +404,44 @@ describe("Component Return Types", () => {
         };
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(1);
 
       stateFn!.type = "string";
       await new Promise((resolve) => setTimeout(resolve, 0));
 
+      expect(container.textContent).toBe("String");
+
       stateFn!.type = "null";
       await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(container.childNodes.length).toBe(0);
 
       stateFn!.type = "element";
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements).toBeDefined();
+      expect(container.children.length).toBe(1);
+      expect(container.textContent).toBe("Element");
     });
   });
 
   describe("Edge Cases", () => {
     it("should handle component returning empty array", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => [];
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements).toBeDefined();
-      expect(Array.isArray(elements)).toBe(true);
+      expect(container.childNodes.length).toBe(0);
     });
 
     it("should handle component returning array with nulls", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => [
           jsx("div", { children: "First" }),
@@ -434,13 +450,14 @@ describe("Component Return Types", () => {
         ];
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements).toBeDefined();
+      expect(container.children.length).toBeGreaterThanOrEqual(2);
     });
 
     it("should handle component returning mixed array types", () => {
+      const container = document.createElement("div");
+
       const MyComponent = () => {
         return () => [
           jsx("div", { children: "Element" }),
@@ -450,42 +467,42 @@ describe("Component Return Types", () => {
         ];
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
 
-      expect(elements.length).toBeGreaterThan(0);
+      expect(container.childNodes.length).toBeGreaterThan(0);
     });
 
     it("should handle deeply nested return values", () => {
+      const container = document.createElement("div");
+
       const Level3 = () => () => jsx("span", { children: "Deep" });
       const Level2 = () => () => jsx(Level3, {});
       const Level1 = () => () => jsx(Level2, {});
 
-      const componentVNode = jsx(Level1, {}) as ComponentVNode;
-      const elements = componentVNode.mount();
+      render(jsx(Level1, {}), container);
 
-      expect(elements[0].textContent).toBe("Deep");
+      expect(container.textContent).toBe("Deep");
     });
 
     it("should handle component switching from empty array to elements", async () => {
+      const container = document.createElement("div");
       let stateFn: { items: string[] } | undefined;
 
       const MyComponent = () => {
         const state = createState({ items: [] as string[] });
         stateFn = state;
 
-        return () =>
-          state.items.map((item) => jsx("div", { children: item }));
+        return () => state.items.map((item) => jsx("div", { children: item }));
       };
 
-      const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-      componentVNode.mount();
+      render(jsx(MyComponent, {}), container);
+
+      expect(container.children.length).toBe(0);
 
       stateFn!.items = ["A", "B", "C"];
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      const elements = componentVNode.getElements();
-      expect(elements.length).toBeGreaterThanOrEqual(3);
+      expect(container.children.length).toBeGreaterThanOrEqual(3);
     });
   });
 });

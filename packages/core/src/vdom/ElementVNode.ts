@@ -89,26 +89,19 @@ export class ElementVNode extends AbstractVNode {
 
         prevNode.unmount();
       }
-    } else if (prevNode instanceof FragmentVNode) {
-      this.mount(this.parent);
-      prevNode.unmount();
-
-      if (isRootPatch) {
-        this.updateChildren(prevNode, this);
-      }
-    } else if (prevNode instanceof TextVNode) {
-      // TODO: This is duplicate of when there is a new tag
-
+    } else {
       const elm = (this.elm = document.createElement(this.tag));
       this.patchProps({});
       const childrenElms = this.patchChildren(prevNode.children);
       elm.appendChild(elementsToFragment(childrenElms));
-      prevNode.getParentElement().replaceChild(elm, prevNode.elm!);
+
+      if (prevNode instanceof TextVNode) {
+        prevNode.getParentElement().replaceChild(elm, prevNode.elm!);
+      } else {
+        // What if previous was a component or fragment?
+      }
+
       prevNode.unmount();
-    } else if (prevNode instanceof ComponentVNode) {
-      // Mount this node
-      // Unmount old
-      // Replace unmounted with mounted
     }
 
     if (isRootPatch) {

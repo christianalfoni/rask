@@ -52,17 +52,14 @@ export abstract class AbstractVNode {
   }
   getParentElement(): HTMLElement {
     let parent = this.parent;
-    let thisElm = this.elm;
 
     // This VNode might not have an element, but relies
     // on a parent for it. So we make sure that we get
     // the actual parent of the element related to this VNode
     while (parent) {
-      if (parent.elm instanceof HTMLElement && thisElm) {
+      if (parent.elm instanceof HTMLElement) {
         // This will always be an HTMLElement as text nodes has no children
         return parent.elm as HTMLElement;
-      } else if (parent.elm) {
-        thisElm = parent.elm;
       }
 
       parent = parent.parent;

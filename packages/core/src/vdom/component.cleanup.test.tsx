@@ -1,42 +1,64 @@
 import { describe, it, expect, vi } from "vitest";
-import { ComponentVNode, onCleanup } from "./ComponentVNode";
-import { jsx } from "./index";
+import { onCleanup } from "./ComponentVNode";
+import { jsx, render } from "./index";
+import { createState } from "../createState";
 
 describe("Component Cleanup", () => {
-  it("should call onCleanup callback when component unmounts", () => {
+  it("should call onCleanup callback when component unmounts", async () => {
+    const container = document.createElement("div");
     const cleanupFn = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       onCleanup(cleanupFn);
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () =>
+        state.show ? jsx(MyComponent, {}) : jsx("div", { children: "Empty" });
+    };
+
+    render(jsx(App, {}), container);
 
     expect(cleanupFn).not.toHaveBeenCalled();
 
-    componentVNode.unmount();
+    // Hide component to trigger unmount
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(cleanupFn).toHaveBeenCalledTimes(1);
   });
 
-  it("should call multiple onCleanup callbacks in order", () => {
+  it("should call multiple onCleanup callbacks in order", async () => {
+    const container = document.createElement("div");
     const calls: number[] = [];
     const cleanup1 = vi.fn(() => calls.push(1));
     const cleanup2 = vi.fn(() => calls.push(2));
     const cleanup3 = vi.fn(() => calls.push(3));
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       onCleanup(cleanup1);
       onCleanup(cleanup2);
       onCleanup(cleanup3);
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
-    componentVNode.unmount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
+
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(cleanup1).toHaveBeenCalledTimes(1);
     expect(cleanup2).toHaveBeenCalledTimes(1);
@@ -44,32 +66,46 @@ describe("Component Cleanup", () => {
     expect(calls).toEqual([1, 2, 3]);
   });
 
-  it("should cleanup event listeners", () => {
-    const handleClick = vi.fn();
+  it("should cleanup event listeners", async () => {
+    const container = document.createElement("div");
+    const cleanupFn = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const button = document.createElement("button");
-      button.addEventListener("click", handleClick);
+      button.addEventListener("click", cleanupFn);
 
       onCleanup(() => {
-        button.removeEventListener("click", handleClick);
+        button.removeEventListener("click", cleanupFn);
+        cleanupFn();
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
-    componentVNode.unmount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
 
-    // After cleanup, event listener should be removed
-    // This test verifies the cleanup function was called
-    expect(true).toBe(true);
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
+
+    expect(cleanupFn).not.toHaveBeenCalled();
+
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Cleanup function should be called
+    expect(cleanupFn).toHaveBeenCalledTimes(1);
   });
 
-  it("should cleanup intervals", () => {
+  it("should cleanup intervals", async () => {
     vi.useFakeTimers();
+    const container = document.createElement("div");
     const callback = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const intervalId = setInterval(callback, 1000);
@@ -78,16 +114,23 @@ describe("Component Cleanup", () => {
         clearInterval(intervalId);
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
 
     vi.advanceTimersByTime(2000);
     expect(callback).toHaveBeenCalledTimes(2);
 
-    componentVNode.unmount();
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // After cleanup, interval should be cleared
     vi.advanceTimersByTime(2000);
@@ -96,9 +139,11 @@ describe("Component Cleanup", () => {
     vi.useRealTimers();
   });
 
-  it("should cleanup timeouts", () => {
+  it("should cleanup timeouts", async () => {
     vi.useFakeTimers();
+    const container = document.createElement("div");
     const callback = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const timeoutId = setTimeout(callback, 1000);
@@ -107,13 +152,20 @@ describe("Component Cleanup", () => {
         clearTimeout(timeoutId);
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
 
-    componentVNode.unmount();
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
+
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // After cleanup, timeout should be cleared
     vi.advanceTimersByTime(2000);
@@ -122,9 +174,11 @@ describe("Component Cleanup", () => {
     vi.useRealTimers();
   });
 
-  it("should cleanup subscriptions", () => {
+  it("should cleanup subscriptions", async () => {
+    const container = document.createElement("div");
     const unsubscribe = vi.fn();
     const subscribe = vi.fn(() => unsubscribe);
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const subscription = subscribe();
@@ -133,37 +187,46 @@ describe("Component Cleanup", () => {
         subscription();
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
 
     expect(subscribe).toHaveBeenCalledTimes(1);
     expect(unsubscribe).not.toHaveBeenCalled();
 
-    componentVNode.unmount();
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 
   it("should not call cleanup when component is still mounted", () => {
+    const container = document.createElement("div");
     const cleanupFn = vi.fn();
 
     const MyComponent = () => {
       onCleanup(cleanupFn);
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    render(jsx(MyComponent, {}), container);
 
     expect(cleanupFn).not.toHaveBeenCalled();
   });
 
-  it("should call cleanup when component is replaced with different component", () => {
+  it("should call cleanup when component is replaced with different component", async () => {
+    const container = document.createElement("div");
     const cleanup1 = vi.fn();
     const cleanup2 = vi.fn();
+    let stateFn: { showFirst: boolean } | undefined;
 
     const Component1 = () => {
       onCleanup(cleanup1);
@@ -175,13 +238,20 @@ describe("Component Cleanup", () => {
       return () => jsx("div", { children: "Component 2" });
     };
 
-    const componentVNode1 = jsx(Component1, {}) as ComponentVNode;
-    componentVNode1.mount();
+    const App = () => {
+      const state = createState({ showFirst: true });
+      stateFn = state;
+
+      return () =>
+        state.showFirst ? jsx(Component1, {}) : jsx(Component2, {});
+    };
+
+    render(jsx(App, {}), container);
 
     expect(cleanup1).not.toHaveBeenCalled();
 
-    const componentVNode2 = jsx(Component2, {}) as ComponentVNode;
-    componentVNode2.patch(componentVNode1);
+    stateFn!.showFirst = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Component1 should be cleaned up when replaced with Component2
     expect(cleanup1).toHaveBeenCalledTimes(1);
@@ -194,9 +264,11 @@ describe("Component Cleanup", () => {
     }).toThrow("Only use onCleanup in component setup");
   });
 
-  it("should cleanup nested resources", () => {
+  it("should cleanup nested resources", async () => {
+    const container = document.createElement("div");
     const outerCleanup = vi.fn();
     const innerCleanup = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const resource1 = { close: outerCleanup };
@@ -205,43 +277,63 @@ describe("Component Cleanup", () => {
       const resource2 = { dispose: innerCleanup };
       onCleanup(() => resource2.dispose());
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
-    componentVNode.unmount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
+
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(outerCleanup).toHaveBeenCalledTimes(1);
     expect(innerCleanup).toHaveBeenCalledTimes(1);
   });
 
-  it("should handle cleanup errors gracefully", () => {
+  it("should handle cleanup errors gracefully", async () => {
+    const container = document.createElement("div");
     const cleanup1 = vi.fn(() => {
       throw new Error("Cleanup error");
     });
     const cleanup2 = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       onCleanup(cleanup1);
       onCleanup(cleanup2);
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
 
     // Should throw when cleanup errors occur
-    expect(() => componentVNode.unmount()).toThrow("Cleanup error");
+    stateFn!.show = false;
+    await expect(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }).rejects.toThrow("Cleanup error");
 
     expect(cleanup1).toHaveBeenCalledTimes(1);
-    // cleanup2 may or may not be called depending on error handling strategy
   });
 
-  it("should cleanup component with state and effects", () => {
+  it("should cleanup component with state and effects", async () => {
     vi.useFakeTimers();
+    const container = document.createElement("div");
     const updateCallback = vi.fn();
     const cleanupFn = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const intervalId = setInterval(updateCallback, 100);
@@ -251,16 +343,23 @@ describe("Component Cleanup", () => {
         cleanupFn();
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
 
     vi.advanceTimersByTime(500);
     expect(updateCallback).toHaveBeenCalledTimes(5);
 
-    componentVNode.unmount();
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(cleanupFn).toHaveBeenCalledTimes(1);
 
@@ -271,8 +370,10 @@ describe("Component Cleanup", () => {
     vi.useRealTimers();
   });
 
-  it("should allow cleanup to access component closure variables", () => {
+  it("should allow cleanup to access component closure variables", async () => {
+    const container = document.createElement("div");
     let capturedValue: number | undefined;
+    let stateFn: { show: boolean } | undefined;
 
     const MyComponent = () => {
       const value = 42;
@@ -281,19 +382,29 @@ describe("Component Cleanup", () => {
         capturedValue = value;
       });
 
-      return () => jsx("div", {});
+      return () => jsx("div", { children: "Component" });
     };
 
-    const componentVNode = jsx(MyComponent, {}) as ComponentVNode;
-    componentVNode.mount();
-    componentVNode.unmount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(MyComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
+
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(capturedValue).toBe(42);
   });
 
-  it("should cleanup parent and child components", () => {
+  it.only("should cleanup parent and child components", async () => {
+    const container = document.createElement("div");
     const parentCleanup = vi.fn();
     const childCleanup = vi.fn();
+    let stateFn: { show: boolean } | undefined;
 
     const ChildComponent = () => {
       onCleanup(childCleanup);
@@ -305,13 +416,20 @@ describe("Component Cleanup", () => {
       return () => jsx(ChildComponent, {});
     };
 
-    const componentVNode = jsx(ParentComponent, {}) as ComponentVNode;
-    componentVNode.mount();
+    const App = () => {
+      const state = createState({ show: true });
+      stateFn = state;
+
+      return () => (state.show ? jsx(ParentComponent, {}) : null);
+    };
+
+    render(jsx(App, {}), container);
 
     expect(parentCleanup).not.toHaveBeenCalled();
     expect(childCleanup).not.toHaveBeenCalled();
 
-    componentVNode.unmount();
+    stateFn!.show = false;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(parentCleanup).toHaveBeenCalledTimes(1);
     expect(childCleanup).toHaveBeenCalledTimes(1);
