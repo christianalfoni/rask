@@ -31,7 +31,13 @@ export class FragmentVNode extends AbstractVNode {
     this.parent?.rerender();
   }
   patch(newNode: FragmentVNode) {
-    this.children = this.patchChildren(newNode.children);
+    const { children, hasChangedStructure } = this.patchChildren(
+      newNode.children
+    );
+    this.children = children;
+    if (hasChangedStructure) {
+      this.rerender();
+    }
   }
   unmount() {
     this.children.forEach((child) => child.unmount());

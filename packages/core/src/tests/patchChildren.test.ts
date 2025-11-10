@@ -57,7 +57,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("b");
       const parent = new MockParentVNode([]);
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // New children should be mounted
       expect(newChild1.mountCalls).toBe(1);
@@ -67,6 +69,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be the new children (since old was empty)
       expect(result).toEqual([newChild1, newChild2]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should unmount all old children when new is empty", () => {
@@ -74,7 +77,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const oldChild2 = new MockVNode("b");
       const parent = new MockParentVNode([oldChild1, oldChild2]);
 
-      const result = parent.patchChildren(toVNodes([]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([])
+      );
 
       // Old children should be unmounted
       expect(oldChild1.unmountCalls).toBe(1);
@@ -82,6 +87,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be empty
       expect(result).toEqual([]);
+      expect(hasChangedStructure).toBe(true);
     });
   });
 
@@ -96,7 +102,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("b");
       const newChild3 = new MockVNode("c");
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -121,6 +127,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should still be the OLD children (reused)
       expect(result).toEqual([oldChild1, oldChild2, oldChild3]);
+      expect(hasChangedStructure).toBe(false);
     });
 
     it("should handle reordered children with keys", () => {
@@ -134,7 +141,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("a");
       const newChild3 = new MockVNode("b");
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -154,6 +161,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       expect(result[0].key).toBe("c");
       expect(result[1].key).toBe("a");
       expect(result[2].key).toBe("b");
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should mount new children and unmount removed children", () => {
@@ -167,7 +175,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("c");
       const newChild3 = new MockVNode("d");
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -187,6 +195,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       expect(result).toContain(newChild3);
       expect(result).not.toContain(oldChild2);
       expect(result.length).toBe(3);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should replace all children when all keys change", () => {
@@ -197,7 +206,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild1 = new MockVNode("x");
       const newChild2 = new MockVNode("y");
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // All new children should be mounted
       expect(newChild1.mountCalls).toBe(1);
@@ -209,6 +220,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be the new children
       expect(result).toEqual([newChild1, newChild2]);
+      expect(hasChangedStructure).toBe(true);
     });
   });
 
@@ -223,7 +235,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode();
       const newChild3 = new MockVNode();
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -239,6 +251,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be old children (reused)
       expect(result).toEqual([oldChild1, oldChild2, oldChild3]);
+      expect(hasChangedStructure).toBe(false);
     });
 
     it("should mount new children when growing without keys", () => {
@@ -251,7 +264,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild3 = new MockVNode();
       const newChild4 = new MockVNode();
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3, newChild4])
       );
 
@@ -269,6 +282,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1, oldChild2, newChild3, newChild4]
       expect(result).toEqual([oldChild1, oldChild2, newChild3, newChild4]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should unmount old children when shrinking without keys", () => {
@@ -286,7 +300,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild1 = new MockVNode();
       const newChild2 = new MockVNode();
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // First two should be patched
       expect(oldChild1.patchedWith).toBe(newChild1);
@@ -302,6 +318,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1, oldChild2]
       expect(result).toEqual([oldChild1, oldChild2]);
+      expect(hasChangedStructure).toBe(true);
     });
   });
 
@@ -316,7 +333,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode(); // key: undefined -> index 1
       const newChild3 = new MockVNode("c"); // key: "c"
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -334,6 +351,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be old children (reused)
       expect(result).toEqual([oldChild1, oldChild2, oldChild3]);
+      expect(hasChangedStructure).toBe(false);
     });
   });
 
@@ -345,7 +363,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild1 = new MockVNode("title");
       const newChild2 = new MockVNode("details");
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // Title should be patched (reused)
       expect(oldChild1.patchedWith).toBe(newChild1);
@@ -358,6 +378,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1, newChild2]
       expect(result).toEqual([oldChild1, newChild2]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle conditional rendering (component -> null)", () => {
@@ -367,7 +388,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       const newChild1 = new MockVNode("title");
 
-      const result = parent.patchChildren(toVNodes([newChild1]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1])
+      );
 
       // Title should be patched (reused)
       expect(oldChild1.patchedWith).toBe(newChild1);
@@ -380,6 +403,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1]
       expect(result).toEqual([oldChild1]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle list with items added at beginning", () => {
@@ -391,7 +415,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("item-1");
       const newChild3 = new MockVNode("item-2");
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -408,6 +432,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [newChild1, oldChild1, oldChild2]
       expect(result).toEqual([newChild1, oldChild1, oldChild2]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle list with items added at end", () => {
@@ -419,7 +444,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("item-2");
       const newChild3 = new MockVNode("item-3"); // New item at end
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -436,6 +461,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1, oldChild2, newChild3]
       expect(result).toEqual([oldChild1, oldChild2, newChild3]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle list with item removed from middle", () => {
@@ -447,7 +473,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild1 = new MockVNode("item-1");
       const newChild2 = new MockVNode("item-3"); // item-2 removed
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // item-1 and item-3 should be patched (reused)
       expect(oldChild1.patchedWith).toBe(newChild1);
@@ -462,6 +490,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be [oldChild1, oldChild3]
       expect(result).toEqual([oldChild1, oldChild3]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle empty -> multiple children", () => {
@@ -471,7 +500,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild2 = new MockVNode("b");
       const newChild3 = new MockVNode("c");
 
-      const result = parent.patchChildren(
+      const { children: result, hasChangedStructure } = parent.patchChildren(
         toVNodes([newChild1, newChild2, newChild3])
       );
 
@@ -482,6 +511,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be the new children
       expect(result).toEqual([newChild1, newChild2, newChild3]);
+      expect(hasChangedStructure).toBe(true);
     });
 
     it("should handle multiple children -> empty", () => {
@@ -490,7 +520,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const oldChild3 = new MockVNode("c");
       const parent = new MockParentVNode([oldChild1, oldChild2, oldChild3]);
 
-      const result = parent.patchChildren(toVNodes([]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([])
+      );
 
       // All should be unmounted
       expect(oldChild1.unmountCalls).toBe(1);
@@ -499,6 +531,7 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be empty
       expect(result).toEqual([]);
+      expect(hasChangedStructure).toBe(true);
     });
   });
 
@@ -511,7 +544,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       const newChild1 = new MockVNode("a");
       const newChild2 = new MockVNode("b");
 
-      const result = parent.patchChildren(toVNodes([newChild1, newChild2]));
+      const { children: result, hasChangedStructure } = parent.patchChildren(
+        toVNodes([newChild1, newChild2])
+      );
 
       // The result should contain the EXACT SAME object references as the old children
       expect(result[0]).toBe(oldChild1); // Same object reference
@@ -520,6 +555,8 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       // NOT the new children
       expect(result[0]).not.toBe(newChild1);
       expect(result[1]).not.toBe(newChild2);
+
+      expect(hasChangedStructure).toBe(false);
     });
   });
 });

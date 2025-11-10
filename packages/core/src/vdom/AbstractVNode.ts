@@ -69,31 +69,39 @@ export abstract class AbstractVNode {
     return true;
   }
 
-  patchChildren(newChildren: VNode[]): VNode[] {
+  patchChildren(newChildren: VNode[]): {
+    children: VNode[];
+    hasChangedStructure: boolean;
+  } {
     const prevChildren = this.children!;
 
     // When there are only new children, we just mount them
     if (newChildren && prevChildren.length === 0) {
       newChildren.forEach((child) => child.mount(this as any));
 
-      return newChildren;
+      return { children: newChildren, hasChangedStructure: true };
     }
 
     // If we want to remove all children, we just unmount the previous ones
     if (!newChildren.length && prevChildren.length) {
       prevChildren.forEach((child) => child.unmount());
 
-      return [];
+      return { children: [], hasChangedStructure: true };
     }
 
-    const oldKeys: Record<string, VNode> = {};
+    const oldKeys: Record<string, { vnode: VNode; index: number }> = {};
 
     prevChildren.forEach((prevChild, index) => {
-      oldKeys[prevChild.key || index] = prevChild;
+      oldKeys[prevChild.key || index] = {
+        vnode: prevChild,
+        index,
+      };
     });
 
     // Build result array in the NEW order
     const result: VNode[] = [];
+
+    let hasChangedStructure = false;
 
     newChildren.forEach((newChild, index) => {
       const key = newChild.key || index;
@@ -103,29 +111,34 @@ export abstract class AbstractVNode {
         // New child - mount and add to result
         newChild.mount(this as any);
         result.push(newChild);
-      } else if (prevChild === newChild) {
+        hasChangedStructure = true;
+      } else if (prevChild?.vnode === newChild) {
         // Same instance - no patching needed, just reuse
-        result.push(prevChild);
+        result.push(prevChild.vnode);
         delete oldKeys[key];
-      } else if (this.canPatch(prevChild, newChild)) {
+        hasChangedStructure = hasChangedStructure || prevChild.index !== index;
+      } else if (this.canPatch(prevChild.vnode, newChild)) {
         // Compatible types - patch and reuse old VNode
-        prevChild.patch(newChild as any);
-        result.push(prevChild);
+        prevChild.vnode.patch(newChild as any);
+        result.push(prevChild.vnode);
         delete oldKeys[key];
+        hasChangedStructure = hasChangedStructure || prevChild.index !== index;
       } else {
         // Incompatible types - replace completely
         newChild.mount(this as any);
-        prevChild.unmount();
+        prevChild.vnode.unmount();
         result.push(newChild);
         delete oldKeys[key];
+        hasChangedStructure = true;
       }
     });
 
     // Unmount any old children that weren't reused
     for (const key in oldKeys) {
-      oldKeys[key].unmount();
+      oldKeys[key].vnode.unmount();
+      hasChangedStructure = true;
     }
 
-    return result;
+    return { children: result, hasChangedStructure };
   }
 }

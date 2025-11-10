@@ -76,8 +76,14 @@ export class ElementVNode extends AbstractVNode {
   patch(newNode: ElementVNode) {
     this.patchProps(newNode.props);
     this.props = newNode.props;
-    this.children = this.patchChildren(newNode.children);
-    this.syncDOMChildren();
+    const { children, hasChangedStructure } = this.patchChildren(
+      newNode.children
+    );
+    this.children = children;
+
+    if (hasChangedStructure) {
+      this.syncDOMChildren();
+    }
   }
   unmount() {
     this.children.forEach((child) => child.unmount());

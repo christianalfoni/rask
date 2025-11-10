@@ -165,18 +165,12 @@ export class ComponentVNode extends AbstractVNode {
           this.root?.setAsCurrent();
           const newChildren = executeRender();
           const prevChildren = this.children;
-          this.children = this.patchChildren(newChildren);
+          const { children, hasChangedStructure } =
+            this.patchChildren(newChildren);
 
-          // Typically components return a single element, which does
-          // not require the parent to apply elements to the DOM again
-          const canSelfUpdate =
-            prevChildren.length === 1 &&
-            this.children.length === 1 &&
-            prevChildren[0] instanceof ElementVNode &&
-            this.children[0] instanceof ElementVNode &&
-            this.canPatch(prevChildren[0], this.children[0]);
+          this.children = children;
 
-          if (!canSelfUpdate) {
+          if (hasChangedStructure) {
             this.parent?.rerender();
           }
 
