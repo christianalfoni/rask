@@ -248,4 +248,28 @@ describe("ErrorBoundary", () => {
 
     unmount();
   });
+
+  it("should catch error when component returns JSX directly instead of function", async () => {
+    function BadComponent() {
+      // Wrong: returning JSX directly
+      return <div>Direct JSX</div>;
+    }
+
+    function TestComponent() {
+      return () => (
+        <ErrorBoundary error={(error) => <div>Error: {String(error)}</div>}>
+          <BadComponent />
+        </ErrorBoundary>
+      );
+    }
+
+    const { container, unmount } = renderComponent(<TestComponent />);
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(container.textContent).toContain("Error:");
+    expect(container.textContent).toContain("Component must return a render function");
+
+    unmount();
+  });
 });
