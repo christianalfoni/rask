@@ -185,11 +185,15 @@ export class ComponentVNode extends AbstractVNode {
         } else if (instance.parent) {
           let parent: VNode | undefined = instance.parent;
 
-          while (!(parent instanceof ComponentVNode)) {
+          while (parent && !(parent instanceof ComponentVNode)) {
             parent = parent?.parent;
           }
 
-          parent.instance?.notifyError(childError);
+          // Only call notifyError if we found a ComponentVNode parent
+          if (parent instanceof ComponentVNode) {
+            parent.instance?.notifyError(childError);
+          }
+          // Otherwise there's no ErrorBoundary, so do nothing
         } else {
           throw childError;
         }
@@ -199,6 +203,21 @@ export class ComponentVNode extends AbstractVNode {
     this.root?.setAsCurrent();
     this.root?.pushComponent(instance);
     const render = this.component(instance.reactiveProps);
+
+    // Validate that render is a function
+    if (typeof render !== "function") {
+      const initError = new Error(
+        `Component must return a render function, but got ${(render as any) instanceof AbstractVNode ? "JSX" : typeof render}. ` +
+        `Components should return a function that returns JSX: \`return () => <div>...</div>\``
+      );
+      console.error("Error initializing component:", initError);
+      error = initError;
+      instance.notifyError(initError);
+      this.root?.popComponent();
+      this.root?.clearCurrent();
+      return [];
+    }
+
     this.children = executeRender();
     this.root?.popComponent();
     this.root?.clearCurrent();
