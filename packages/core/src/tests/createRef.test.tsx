@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createRef } from "../createRef";
-import { render } from "../vdom";
+import { jsx, render } from "../vdom";
 
 describe("createRef", () => {
   it("should create a ref with null initial value", () => {
@@ -37,13 +37,13 @@ describe("createRef", () => {
     const ref = createRef<HTMLDivElement>();
 
     function TestComponent() {
-      return () => <div ref={ref}>Hello</div>;
+      return () => jsx("div", { ref, children: "Hello" });
     }
 
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(<TestComponent />, container);
+    const vnode = render(jsx(TestComponent, {}), container);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -75,18 +75,19 @@ describe("createRef", () => {
     const buttonRef = createRef<HTMLButtonElement>();
 
     function TestComponent() {
-      return () => (
-        <div>
-          <input ref={inputRef} type="text" />
-          <button ref={buttonRef}>Click</button>
-        </div>
-      );
+      return () =>
+        jsx("div", {
+          children: [
+            jsx("input", { ref: inputRef, type: "text" }),
+            jsx("button", { ref: buttonRef, children: "Click" }),
+          ],
+        });
     }
 
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(<TestComponent />, container);
+    const vnode = render(jsx(TestComponent, {}), container);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -100,13 +101,13 @@ describe("createRef", () => {
     const ref = createRef<HTMLInputElement>();
 
     function TestComponent() {
-      return () => <input ref={ref} type="text" value="test" />;
+      return () => jsx("input", { ref, type: "text", value: "test" });
     }
 
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(<TestComponent />, container);
+    const vnode = render(jsx(TestComponent, {}), container);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
