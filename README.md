@@ -4,13 +4,13 @@
   <img src="logo.png" alt="Logo" width="200">
 </p>
 
-A lightweight reactive component library that combines the simplicity of observable state management with the full power of a virtual DOM reconciler.
+A lightweight reactive component library that combines the simplicity of observable state management with the full power of a virtual DOM reconciler. Ideal for single page applications, using web technology.
 
 ```bash
 npm install rask-ui
 ```
 
-## The Problem with Modern UI Frameworks
+## The Itch with Modern UI Frameworks
 
 Modern UI frameworks present developers with a fundamental tradeoff between state management and UI expression:
 
@@ -42,9 +42,9 @@ function MyApp() {
 }
 ```
 
-Solid offers a simpler mental model with fine-grained reactivity. Updates don't happen by calling the component function again, but in "hidden" parts of expressions in the UI. However:
+Solid offers a seamingly simpler mental model with fine-grained reactivity. Updates don't happen by calling the component function again, which resolves the mental strain of expressing state management, however:
 
-- Requires understanding special compiler transformations
+- The code you write is compiled to balance DX vs requirements of the runtime
 - Special components for expressing dynamic UIs (`<Show>`, `<For>`, etc.)
 - Different signatures for accessing reactive values: `count()` VS `state.count`
 
@@ -60,13 +60,13 @@ function MyApp() {
 
 RASK gives you:
 
-- **Predictable observable state management** - No reconciler interference, just plain reactivity
-- **Full reconciler power** - Express complex UIs naturally with components
+- **Simple state management** - No reconciler interference with your state management
+- **Full reconciler power** - Express complex UIs naturally with the language
 - **No special syntax** - Access state properties directly, no function calls
 - **No compiler magic** - Plain JavaScript/TypeScript
-- **Simple mental model** - State updates trigger only affected components
+- **Simple mental model** - Just implement state and UI. No manual optimizations, special syntax or compiler magic
 
-Built on [Inferno JS](https://github.com/infernojs/inferno).
+:fire: Built on [Inferno JS](https://github.com/infernojs/inferno).
 
 ## Getting Started
 
@@ -182,9 +182,9 @@ function Parent() {
 
 When `state.count` changes in Parent, only Child re-renders because it accesses `props.value`.
 
-### Important: Do Not Destructure Reactive Objects
+### One Rule To Accept
 
-**RASK follows the same rule as Solid.js**: Never destructure reactive objects (state, props, context values, async, query, mutation). Destructuring extracts plain values and breaks reactivity.
+**RASK has observable primitives**: Never destructure reactive objects (state, props, context values, async, query, mutation). Destructuring extracts plain values and breaks reactivity.
 
 ```tsx
 // ❌ BAD - Destructuring breaks reactivity
@@ -300,24 +300,26 @@ Creates a view that merges multiple objects (reactive or plain) into a single ob
 ```tsx
 import { createView, createState } from "rask-ui";
 
-function Counter() {
+function createCounter() {
   const state = createState({ count: 0, name: "Counter" });
-  const helpers = {
-    increment: () => state.count++,
-    decrement: () => state.count--,
-    reset: () => (state.count = 0),
-  };
+  const increment = () => state.count++;
+  const decrement = () => state.count--;
+  const reset = () => (state.count = 0);
 
-  const view = createView(state, helpers);
+  return createView(state, { increment, decrement, reset });
+}
+
+function Counter() {
+  const counter = createCounter();
 
   return () => (
     <div>
       <h1>
-        {view.name}: {view.count}
+        {counter.name}: {counter.count}
       </h1>
-      <button onClick={view.increment}>+</button>
-      <button onClick={view.decrement}>-</button>
-      <button onClick={view.reset}>Reset</button>
+      <button onClick={counter.increment}>+</button>
+      <button onClick={counter.decrement}>-</button>
+      <button onClick={counter.reset}>Reset</button>
     </div>
   );
 }
@@ -328,38 +330,6 @@ function Counter() {
 - `...objects: object[]` - Objects to merge (reactive or plain). Later arguments override earlier ones.
 
 **Returns:** A view object with getters for all properties, maintaining reactivity
-
-**Use Cases:**
-
-1. **Merge state with helper methods:**
-
-   ```tsx
-   const state = createState({ count: 0 });
-   const helpers = { increment: () => state.count++ };
-   const view = createView(state, helpers);
-   // Access both: view.count, view.increment()
-   ```
-
-2. **Combine multiple reactive objects:**
-
-   ```tsx
-   const user = createState({ name: "Alice" });
-   const settings = createState({ theme: "dark" });
-   const view = createView(user, settings);
-   // Access both: view.name, view.theme
-   ```
-
-3. **Override properties with computed values:**
-   ```tsx
-   const state = createState({ firstName: "John", lastName: "Doe" });
-   const computed = {
-     get fullName() {
-       return `${state.firstName} ${state.lastName}`;
-     },
-   };
-   const view = createView(state, computed);
-   // view.fullName returns "John Doe" and updates when state changes
-   ```
 
 **Notes:**
 
@@ -402,30 +372,6 @@ function Example() {
 **Usage:**
 
 Pass the ref to an element's `ref` prop. The `current` property will be set to the DOM element when mounted and `null` when unmounted.
-
-**Example with SVG:**
-
-```tsx
-function Drawing() {
-  const svgRef = createRef<SVGSVGElement>();
-
-  const getSize = () => {
-    if (svgRef.current) {
-      const bbox = svgRef.current.getBBox();
-      console.log(`Width: ${bbox.width}, Height: ${bbox.height}`);
-    }
-  };
-
-  return () => (
-    <div>
-      <svg ref={svgRef} width="200" height="200">
-        <circle cx="100" cy="100" r="50" />
-      </svg>
-      <button onClick={getSize}>Get SVG Size</button>
-    </div>
-  );
-}
-```
 
 ---
 
@@ -543,13 +489,16 @@ import { createAsync } from "rask-ui";
 function UserProfile() {
   const user = createAsync(fetch("/api/user").then((r) => r.json()));
 
-  return () => (
-    <div>
-      {user.isPending && <p>Loading...</p>}
-      {user.error && <p>Error: {user.error}</p>}
-      {user.value && <p>Hello, {user.value.name}!</p>}
-    </div>
-  );
+  return () => }
+    if (user.isPending) {
+      return <p>Loading...</p>
+    }
+
+    if (user.error) {
+      return <p>Error: {user.error}</p>
+    }
+
+    return <p>Hello, {user.value.name}!</p>
 }
 ```
 
@@ -580,16 +529,25 @@ import { createQuery } from "rask-ui";
 
 function Posts() {
   const posts = createQuery(() => fetch("/api/posts").then((r) => r.json()));
+  const renderPosts = () => {
+    if (posts.isPending) {
+      return <p>Loading...</p>;
+    }
+
+    if (posts.error) {
+      return <p>Error: {posts.error}</p>;
+    }
+
+    return posts.data.map((post) => (
+      <article key={post.id}>{post.title}</article>
+    ));
+  };
 
   return () => (
     <div>
       <button onClick={() => posts.fetch()}>Refresh</button>
       <button onClick={() => posts.fetch(true)}>Force Refresh</button>
-
-      {posts.isPending && <p>Loading...</p>}
-      {posts.error && <p>Error: {posts.error}</p>}
-      {posts.data &&
-        posts.data.map((post) => <article key={post.id}>{post.title}</article>)}
+      {renderPosts()}
     </div>
   );
 }
@@ -630,7 +588,7 @@ function CreatePost() {
     fetch("/api/posts", {
       method: "POST",
       body: JSON.stringify(data),
-    }).then((r) => r.json())
+    }))
   );
 
   const handleSubmit = () => {
