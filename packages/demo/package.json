@@ -1,6 +1,6 @@
 {
   "name": "@rask-ui/demo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "private": true,
   "scripts": {
@@ -12,7 +12,11 @@
     "rask-ui": "workspace:*"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
     "@types/node": "^22.10.2",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
     "typescript": "^5.7.3",
     "vite": "^6.0.3"
   }

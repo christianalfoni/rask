@@ -18,19 +18,7 @@ export class Signal {
   }
   notify() {
     const currentSubscribers = Array.from(this.subscribers);
-    notifyQueue.push(() => {
-      currentSubscribers.forEach((cb) => cb());
-    });
-
-    if (!isQueuingNotify) {
-      isQueuingNotify = true;
-      queueMicrotask(() => {
-        isQueuingNotify = false;
-        const queue = notifyQueue;
-        notifyQueue = [];
-        queue.forEach((cb) => cb());
-      });
-    }
+    currentSubscribers.forEach((cb) => cb());
   }
 }
 

@@ -29,7 +29,7 @@ export function createState<T extends object>(state: T): T {
 }
 
 const proxyCache = new WeakMap<any, any>();
-const PROXY_MARKER = Symbol('isProxy');
+const PROXY_MARKER = Symbol("isProxy");
 
 function getProxy(value: object) {
   // Check if already a proxy to avoid double-wrapping
@@ -87,13 +87,14 @@ function getProxy(value: object) {
 
       const oldValue = Reflect.get(target, key);
 
+      const setResult = Reflect.set(target, key, newValue);
       // We only notify if actual change, though array length actually updates under the hood
       if (newValue !== oldValue || (Array.isArray(value) && key === "length")) {
         const signal = signals[key];
         signal?.notify();
       }
 
-      return Reflect.set(target, key, newValue);
+      return setResult;
     },
     deleteProperty(target, key) {
       if (typeof key === "symbol") {

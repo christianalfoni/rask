@@ -47,6 +47,7 @@ class RaskComponent<P extends Props<any>> extends Component<
   private observer = new Observer(() => {
     this.forceUpdate();
   });
+  private hasDirtyProps = false;
   contexts = new Map();
   getChildContext() {
     const parentGetContext = this.context.getContext;
@@ -63,28 +64,21 @@ class RaskComponent<P extends Props<any>> extends Component<
   componentDidMount(): void {
     this.onMounts.forEach((cb) => cb());
   }
-  componentWillReceiveProps(
-    nextProps: Readonly<
-      { children?: InfernoNode } & P & { __component: RaskFunctionComponent<P> }
-    >
-  ): void {
-    if (this.props.children === nextProps.children) {
-      for (const prop in nextProps) {
-        if (prop === "children") {
-          continue;
-        }
-        // @ts-ignore
-        this.reactiveProps[prop] = nextProps[prop];
-      }
-    } else {
-      this.prevChildren = this.props.children;
-    }
-  }
+
   componentWillUnmount(): void {
     this.onCleanups.forEach((cb) => cb());
   }
-  shouldComponentUpdate(): boolean {
-    return this.prevChildren !== this.props.children;
+  shouldComponentUpdate(nextProps: Props<any>): boolean {
+    for (const prop in nextProps) {
+      if (prop === "__component") {
+        continue;
+      }
+
+      // @ts-ignore
+      this.reactiveProps[prop] = nextProps[prop];
+    }
+
+    return true;
   }
   render() {
     if (!this.renderFn) {

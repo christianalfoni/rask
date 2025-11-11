@@ -1,3 +1,5 @@
+import { options } from "inferno";
+
 export { render } from "inferno";
 export { onCleanup, onMount } from "./component";
 export { createContext } from "./createContext";
