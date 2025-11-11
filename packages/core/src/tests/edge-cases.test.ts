@@ -577,7 +577,7 @@ describe("VDOM Edge Cases", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should handle this without crashing
-      expect(wrapper.children.length).toBe(2);
+      expect(wrapper.children.length).toBe(3);
     });
 
     it("should handle numeric keys", async () => {

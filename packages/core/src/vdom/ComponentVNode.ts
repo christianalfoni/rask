@@ -169,7 +169,13 @@ export class ComponentVNode extends AbstractVNode {
 
           this.children = children;
 
-          if (hasChangedStructure) {
+          // So if a fragment is returned where we add new elements we can not safely
+          // add them yet, check Fragment for a potential later optimization
+          const hasAddOperation = operations.some(
+            (operation) => operation.type === "add"
+          );
+
+          if (hasChangedStructure || hasAddOperation) {
             this.parent?.rerender();
           } else if (operations.length) {
             this.parent?.rerender(operations);

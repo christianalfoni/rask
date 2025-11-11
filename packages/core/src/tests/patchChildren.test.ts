@@ -220,7 +220,9 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
       expect(result).not.toContain(oldChild2);
       expect(result.length).toBe(3);
       // This is a complex change
-      expect(hasChangedStructure).toBe(true);
+      expect(hasChangedStructure).toBe(false);
+      expect(operations[0].type).toBe("add");
+      expect(operations[1].type).toBe("remove");
     });
 
     it("should replace all children when all keys change", () => {
@@ -247,7 +249,11 @@ describe("patchChildren (new approach: keep old, patch in new)", () => {
 
       // Result should be the new children
       expect(result).toEqual([newChild1, newChild2]);
-      expect(hasChangedStructure).toBe(true);
+
+      expect(hasChangedStructure).toBe(false);
+      expect(operations.length).toBe(4);
+      expect(operations.some((op) => op.type === "add")).toBe(true);
+      expect(operations.some((op) => op.type === "remove")).toBe(true);
     });
   });
 

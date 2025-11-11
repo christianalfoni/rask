@@ -121,9 +121,14 @@ export abstract class AbstractVNode {
 
     // Build result array in the NEW order
     const result: VNode[] = [];
-
-    let hasChangedStructure = false;
     const operations: PatchOperation[] = [];
+
+    // Track indices of reused nodes in their original order
+    const reusedOldIndices: number[] = [];
+    // Track which result positions contain new nodes (not reused/replaced)
+    const isNewNode: boolean[] = [];
+
+    let forceStructuralChange = false;
 
     newChildren.forEach((newChild, index) => {
       const key = newChild.key || index;
@@ -133,37 +138,42 @@ export abstract class AbstractVNode {
         // New child - mount and add to result
         const elm = newChild.mount(this as any);
         result.push(newChild);
-
-        // If we already had a child here we assume that this is a structural change
-        if (prevChildren[index]) {
-          hasChangedStructure = true;
-        } else {
-          // If not, this will be a new element added
-          operations.push({ type: "add", elm });
-        }
+        isNewNode.push(true);
+        operations.push({ type: "add", elm });
       } else if (prevChild?.vnode === newChild) {
         // Same instance - no patching needed, just reuse
         result.push(prevChild.vnode);
+        isNewNode.push(false);
+        reusedOldIndices.push(prevChild.index);
         delete oldKeys[key];
-        // If moved to a different index it means there is a structural change
-        hasChangedStructure = hasChangedStructure || prevChild.index !== index;
       } else if (this.canPatch(prevChild.vnode, newChild)) {
         // Compatible types - patch and reuse old VNode
         prevChild.vnode.patch(newChild as any);
         result.push(prevChild.vnode);
+        isNewNode.push(false);
+        reusedOldIndices.push(prevChild.index);
         delete oldKeys[key];
-        // If moved to a different index it means there is a structural change
-        hasChangedStructure = hasChangedStructure || prevChild.index !== index;
       } else {
         // Incompatible types - replace completely
         const newElm = newChild.mount(this as any);
         prevChild.vnode.unmount();
         result.push(newChild);
+        isNewNode.push(false); // Replacement, not an insertion
         delete oldKeys[key];
+
+        const oldElm = prevChild.vnode.getElements();
+
+        // We need to fall back to structural change when the old node does
+        // not have any elements. This can happen when a component returns null,
+        // throws an error etc.
+        if (!oldElm.length) {
+          forceStructuralChange = true;
+          return;
+        }
 
         operations.push({
           type: "replace",
-          oldElm: prevChild.vnode.getElements(),
+          oldElm,
           newElm,
         });
       }
@@ -177,6 +187,47 @@ export abstract class AbstractVNode {
         elm: oldKeys[key].vnode.getElements(),
       });
     }
+
+    // Detect structural changes:
+    // 1. Reordering: reused nodes are not in their original relative order
+    // 2. Insertion in middle: new nodes inserted before existing nodes
+
+    let hasReordering = false;
+    let hasInsertionInMiddle = false;
+
+    if (!forceStructuralChange) {
+      for (let i = 1; i < reusedOldIndices.length; i++) {
+        if (reusedOldIndices[i] < reusedOldIndices[i - 1]) {
+          hasReordering = true;
+          break;
+        }
+      }
+    }
+
+    if (!hasReordering) {
+      // Find the last position that contains a reused/replaced node
+      let lastReusedResultIndex = -1;
+      for (let i = result.length - 1; i >= 0; i--) {
+        if (!isNewNode[i]) {
+          lastReusedResultIndex = i;
+          break;
+        }
+      }
+
+      // Check if any new nodes were inserted before the last reused/replaced node
+
+      if (lastReusedResultIndex >= 0) {
+        for (let i = 0; i < lastReusedResultIndex; i++) {
+          if (isNewNode[i]) {
+            hasInsertionInMiddle = true;
+            break;
+          }
+        }
+      }
+    }
+
+    const hasChangedStructure =
+      forceStructuralChange || hasReordering || hasInsertionInMiddle;
 
     if (hasChangedStructure) {
       operations.length = 0;

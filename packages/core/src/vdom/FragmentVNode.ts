@@ -31,13 +31,21 @@ export class FragmentVNode extends AbstractVNode {
     this.parent?.rerender(operations);
   }
   patch(newNode: FragmentVNode) {
-    const { children, hasChangedStructure } = this.patchChildren(
+    const { children, hasChangedStructure, operations } = this.patchChildren(
       newNode.children
     );
     this.children = children;
-    if (hasChangedStructure) {
-      this.rerender();
-    }
+
+    // So we can safely pass remove/replace operations up to the parent, but add
+    // is very tricky as parent has potentially other children as well. This can be
+    // handled with some additional detection, changing it to insertBefore. This can be
+    // done by passing this vnode up to the parent
+    this.rerender(
+      hasChangedStructure ||
+        operations.some((operation) => operation.type === "add")
+        ? undefined
+        : operations
+    );
   }
   unmount() {
     this.children.forEach((child) => child.unmount());
