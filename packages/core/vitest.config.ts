@@ -1,21 +1,29 @@
-import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { defineConfig } from "vitest/config";
+import path from "path";
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: ['./src/test-setup.ts'],
   },
   resolve: {
     alias: [
-      { find: /^rask-ui\/jsx-runtime$/, replacement: path.resolve(__dirname, './src/jsx-runtime.ts') },
-      { find: /^rask-ui\/jsx-dev-runtime$/, replacement: path.resolve(__dirname, './src/jsx-dev-runtime.ts') },
-      { find: /^rask-ui$/, replacement: path.resolve(__dirname, './src/index.ts') },
+      {
+        find: /^rask-ui\/jsx-runtime$/,
+        replacement: path.resolve(__dirname, "./src/jsx-runtime.ts"),
+      },
+      {
+        find: /^rask-ui\/jsx-dev-runtime$/,
+        replacement: path.resolve(__dirname, "./src/jsx-dev-runtime.ts"),
+      },
+      {
+        find: /^rask-ui$/,
+        replacement: path.resolve(__dirname, "./src/index.ts"),
+      },
     ],
   },
   esbuild: {
-    jsx: 'automatic',
-    jsxImportSource: 'rask-ui',
+    jsx: "automatic",
+    jsxImportSource: "rask-ui",
   },
 });

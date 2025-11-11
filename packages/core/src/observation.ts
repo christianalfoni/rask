@@ -4,6 +4,9 @@ export function getCurrentObserver() {
   return observerStack[0];
 }
 
+let isQueuingNotify = false;
+let notifyQueue: Array<() => void> = [];
+
 export class Signal {
   private subscribers = new Set<() => void>();
   subscribe(cb: () => void) {
@@ -14,7 +17,20 @@ export class Signal {
     };
   }
   notify() {
-    this.subscribers.forEach((cb) => cb());
+    const currentSubscribers = Array.from(this.subscribers);
+    notifyQueue.push(() => {
+      currentSubscribers.forEach((cb) => cb());
+    });
+
+    if (!isQueuingNotify) {
+      isQueuingNotify = true;
+      queueMicrotask(() => {
+        isQueuingNotify = false;
+        const queue = notifyQueue;
+        notifyQueue = [];
+        queue.forEach((cb) => cb());
+      });
+    }
   }
 }
 

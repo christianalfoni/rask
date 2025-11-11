@@ -2,17 +2,18 @@ import { describe, it, expect, vi } from "vitest";
 import { Signal, Observer, getCurrentObserver } from "../observation";
 
 describe("Signal", () => {
-  it("should allow subscribing to notifications", () => {
+  it("should allow subscribing to notifications", async () => {
     const signal = new Signal();
     const callback = vi.fn();
 
     signal.subscribe(callback);
     signal.notify();
 
+    await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
-  it("should return a disposer function", () => {
+  it("should return a disposer function", async () => {
     const signal = new Signal();
     const callback = vi.fn();
 
@@ -20,10 +21,11 @@ describe("Signal", () => {
     dispose();
 
     signal.notify();
+    await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it("should handle multiple subscribers", () => {
+  it("should handle multiple subscribers", async () => {
     const signal = new Signal();
     const callback1 = vi.fn();
     const callback2 = vi.fn();
@@ -33,11 +35,12 @@ describe("Signal", () => {
 
     signal.notify();
 
+    await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
     expect(callback1).toHaveBeenCalledTimes(1);
     expect(callback2).toHaveBeenCalledTimes(1);
   });
 
-  it("should allow unsubscribing individual callbacks", () => {
+  it("should allow unsubscribing individual callbacks", async () => {
     const signal = new Signal();
     const callback1 = vi.fn();
     const callback2 = vi.fn();
@@ -48,6 +51,7 @@ describe("Signal", () => {
     dispose1();
     signal.notify();
 
+    await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
     expect(callback1).not.toHaveBeenCalled();
     expect(callback2).toHaveBeenCalledTimes(1);
   });

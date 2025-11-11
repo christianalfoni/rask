@@ -1,8 +1,11 @@
 // JSX runtime implementation
+import { Component, createComponentVNode } from "inferno";
+import { VNodeFlags } from "inferno-vnode-flags";
 import type { JSXInternal } from "./jsx";
-import { jsx as internalJsx } from "./vdom";
-
-export { Fragment } from "./vdom/FragmentVNode";
+import { createElement } from "inferno-create-element";
+import { createComponent, RaskFunctionComponent } from "./component";
+import { ErrorBoundary } from "./error";
+export { Fragment } from "inferno";
 
 export function jsx(
   type: string,
@@ -12,12 +15,26 @@ export function jsx(
   key?: string
 ): any;
 export function jsx<P>(
-  type: (props: P) => any,
+  type: ((props: P) => any) | (new () => Component),
   props: P & { children?: any },
   key?: string
 ): any;
-export function jsx(type: any, props: any, key?: any): any {
-  return internalJsx(type, props, key);
+export function jsx(type: any, { children, ...props }: any, key?: any): any {
+  if (typeof type === "string") {
+    return createElement(type, { ...props, key }, ...children);
+  }
+
+  if (type === ErrorBoundary) {
+    console.log("WTF");
+    return createComponentVNode(
+      VNodeFlags.Component,
+      ErrorBoundary,
+      { ...props, children },
+      key
+    );
+  }
+
+  return createComponent({ ...props, children, __component: type }, key);
 }
 
 export function jsxs(

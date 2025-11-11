@@ -129,4 +129,56 @@ describe("createState", () => {
     state.items.splice(1, 1, 99);
     expect(state.items).toEqual([0, 99, 2]);
   });
+
+  it("should cache proxies for array elements to prevent double-wrapping", () => {
+    const state = createState({
+      data: [
+        { id: 1, label: "Item 1" },
+        { id: 2, label: "Item 2" },
+        { id: 3, label: "Item 3" },
+      ],
+    });
+
+    // Access the same array element multiple times
+    const firstAccess = state.data[0];
+    const secondAccess = state.data[0];
+
+    // Should return the exact same proxy reference
+    expect(firstAccess).toBe(secondAccess);
+
+    // Test with array iteration methods
+    const mapped = state.data.map((item) => item);
+    const firstItem = mapped[0];
+    const directAccess = state.data[0];
+
+    // The proxy returned from iteration should be the same as direct access
+    expect(firstItem).toBe(directAccess);
+
+    // Test that we don't double-wrap when iterating multiple times
+    const mapped2 = state.data.map((item) => item);
+    expect(mapped[0]).toBe(mapped2[0]);
+  });
+
+  it("should maintain proxy identity after filter operations", () => {
+    const state = createState({
+      data: [
+        { id: 1, label: "Item 1" },
+        { id: 2, label: "Item 2" },
+        { id: 3, label: "Item 3" },
+      ],
+    });
+
+    // Get reference to an item before filtering
+    const originalItem = state.data[0];
+
+    // Simulate the remove operation: filter creates a new array but reuses proxies
+    state.data = state.data.filter((row) => row.id !== 2);
+
+    // After filter, the first item should still be the same proxy reference
+    const afterFilter = state.data[0];
+    expect(afterFilter).toBe(originalItem);
+
+    // And accessing it multiple times should return the same reference
+    expect(state.data[0]).toBe(state.data[0]);
+  });
 });

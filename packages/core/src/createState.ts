@@ -29,8 +29,14 @@ export function createState<T extends object>(state: T): T {
 }
 
 const proxyCache = new WeakMap<any, any>();
+const PROXY_MARKER = Symbol('isProxy');
 
 function getProxy(value: object) {
+  // Check if already a proxy to avoid double-wrapping
+  if (PROXY_MARKER in value) {
+    return value;
+  }
+
   if (proxyCache.has(value)) {
     return proxyCache.get(value);
   }
@@ -38,7 +44,19 @@ function getProxy(value: object) {
   const signals: Record<string, Signal> = {};
 
   const proxy = new Proxy(value, {
+    has(target, key) {
+      // Support the "in" operator check for PROXY_MARKER
+      if (key === PROXY_MARKER) {
+        return true;
+      }
+      return Reflect.has(target, key);
+    },
     get(target, key) {
+      // Mark this as a proxy to prevent double-wrapping
+      if (key === PROXY_MARKER) {
+        return true;
+      }
+
       const value = Reflect.get(target, key);
 
       if (typeof key === "symbol" || typeof value === "function") {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createContext } from "../createContext";
-import { jsx, render } from "../vdom";
+import { jsx } from "../jsx-runtime";
+import { render } from "../";
 
 describe("createContext", () => {
   it("should create a context object", () => {
@@ -25,11 +26,11 @@ describe("createContext", () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(Parent, {}), container);
+    render(jsx(Parent, {}), container);
 
-    expect((vnode.elm as HTMLElement).textContent).toContain("dark");
+    expect(container.textContent).toContain("dark");
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 
   it("should traverse parent components to find context", () => {
@@ -52,11 +53,11 @@ describe("createContext", () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(GrandParent, {}), container);
+    render(jsx(GrandParent, {}), container);
 
-    expect((vnode.elm as HTMLElement).textContent).toContain("light");
+    expect(container.textContent).toContain("light");
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 
   it("should throw error when context is not found", () => {
@@ -65,16 +66,16 @@ describe("createContext", () => {
     function Child() {
       expect(() => {
         ThemeContext.get();
-      }).toThrow("Could not find context in parent components");
+      }).toThrow("There is no parent context");
       return () => jsx("div", { children: "Child" });
     }
 
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(Child, {}), container);
+    render(jsx(Child, {}), container);
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 
   it("should throw error when setting context outside component", () => {
@@ -82,7 +83,7 @@ describe("createContext", () => {
 
     expect(() => {
       ThemeContext.inject({ theme: "dark" });
-    }).toThrow("No current root");
+    }).toThrow("No current component");
   });
 
   it("should throw error when getting context outside component", () => {
@@ -90,7 +91,7 @@ describe("createContext", () => {
 
     expect(() => {
       ThemeContext.get();
-    }).toThrow("No current root");
+    }).toThrow("No current component");
   });
 
   it("should allow overriding context in nested components", () => {
@@ -124,7 +125,7 @@ describe("createContext", () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(GrandParent, {}), container);
+    render(jsx(GrandParent, {}), container);
 
     const childOfParent = document.querySelector(".child-of-parent");
     const childOfGrandParent = document.querySelector(".child-of-grandparent");
@@ -132,7 +133,7 @@ describe("createContext", () => {
     expect(childOfParent?.textContent).toBe("dark");
     expect(childOfGrandParent?.textContent).toBe("light");
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 
   it("should support multiple different contexts", () => {
@@ -157,11 +158,11 @@ describe("createContext", () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(Parent, {}), container);
+    render(jsx(Parent, {}), container);
 
-    expect((vnode.elm as HTMLElement).textContent).toContain("dark - Alice");
+    expect(container.textContent).toContain("dark - Alice");
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 
   it("should handle context values of different types", () => {
@@ -186,10 +187,10 @@ describe("createContext", () => {
     const container = document.createElement("div");
     document.body.appendChild(container);
 
-    const vnode = render(jsx(Parent, {}), container);
+    render(jsx(Parent, {}), container);
 
-    expect((vnode.elm as HTMLElement).textContent).toContain("42 - a,b,c");
+    expect(container.textContent).toContain("42 - a,b,c");
 
-    document.body.removeChild(vnode.elm as HTMLElement);
+    document.body.removeChild(container);
   });
 });

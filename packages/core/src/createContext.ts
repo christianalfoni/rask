@@ -1,9 +1,3 @@
-import {
-  getCurrentComponent,
-  type ComponentInstance,
-} from "./vdom/ComponentVNode";
-import { findComponentVNode } from "./vdom/utils";
-
 /**
  * Creates a context object for providing and consuming values across component trees.
  *
@@ -28,6 +22,9 @@ import { findComponentVNode } from "./vdom/utils";
  *
  * @returns Context object with inject() and get() methods
  */
+
+import { getCurrentComponent } from "./component";
+
 export function createContext<T>() {
   const context = {
     inject(value: T) {
@@ -37,28 +34,30 @@ export function createContext<T>() {
         throw new Error("You can not inject context outside component setup");
       }
 
-      if (!currentComponent.contexts) {
-        currentComponent.contexts = new Map();
-      }
-
       currentComponent.contexts.set(context, value);
     },
     get(): T {
-      let currentComponent: ComponentInstance | null = getCurrentComponent();
+      let currentComponent = getCurrentComponent();
 
       if (!currentComponent) {
         throw new Error("You can not get context outside component setup");
       }
 
-      while (currentComponent) {
-        if (currentComponent.contexts?.has(context)) {
-          return currentComponent.contexts.get(context) as T;
-        }
-        const componentNode = findComponentVNode(currentComponent.parent);
-        currentComponent = componentNode?.instance ?? null;
+      if (typeof (currentComponent.context as any).getContext !== "function") {
+        throw new Error("There is no parent context");
       }
 
-      throw new Error("Could not find context in parent components");
+      const contextValue = (currentComponent.context as any).getContext(
+        context
+      );
+
+      if (!contextValue) {
+        throw new Error(
+          "There is a parent context, but not the one you are using"
+        );
+      }
+
+      return contextValue;
     },
   };
 

@@ -1,6 +1,6 @@
 {
   "name": "rask-ui",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,5 +35,10 @@
     "jsdom": "^27.1.0",
     "typescript": "^5.7.3",
     "vitest": "^4.0.7"
+  },
+  "dependencies": {
+    "inferno": "^9.0.4",
+    "inferno-create-element": "^9.0.4",
+    "inferno-vnode-flags": "^9.0.4"
   }
 }
