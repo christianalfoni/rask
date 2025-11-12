@@ -1,19 +1,9 @@
+import { queue } from "./batch";
+
 const observerStack: Observer[] = [];
 
 export function getCurrentObserver() {
   return observerStack[0];
-}
-
-let isBatching = false;
-const batchedNotifiers = new Set<() => void>();
-
-export function batch(cb: () => void) {
-  isBatching = true;
-  cb();
-  isBatching = false;
-  const notifiers = Array.from(batchedNotifiers);
-  batchedNotifiers.clear();
-  notifiers.forEach((notify) => notify());
 }
 
 export class Signal {
@@ -41,12 +31,7 @@ export class Observer {
   private onNotify: () => void;
   constructor(onNotify: () => void) {
     this.onNotify = () => {
-      console.log("NOTIFY!!!");
-      if (isBatching) {
-        batchedNotifiers.add(onNotify);
-      } else {
-        onNotify();
-      }
+      queue(onNotify);
     };
   }
   subscribeSignal(signal: Signal) {

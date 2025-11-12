@@ -90,7 +90,6 @@ function getProxy(value: object) {
       const setResult = Reflect.set(target, key, newValue);
       // We only notify if actual change, though array length actually updates under the hood
       if (newValue !== oldValue || (Array.isArray(value) && key === "length")) {
-        console.log("WTF", key, newValue);
         const signal = signals[key];
         signal?.notify();
       }

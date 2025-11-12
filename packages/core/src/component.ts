@@ -1,10 +1,4 @@
-import {
-  createComponentVNode,
-  VNode,
-  Component,
-  Props,
-  InfernoNode,
-} from "inferno";
+import { createComponentVNode, VNode, Component, Props } from "inferno";
 import { VNodeFlags } from "inferno-vnode-flags";
 import { getCurrentObserver, Observer, Signal } from "./observation";
 

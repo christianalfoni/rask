@@ -1,4 +1,5 @@
-export { render } from "inferno";
+import { render as infernoRender } from "inferno";
+import { installEventBatching } from "./batch";
 export { onCleanup, onMount } from "./component";
 export { createContext } from "./createContext";
 export { createState } from "./createState";
@@ -8,4 +9,8 @@ export { createQuery } from "./createQuery";
 export { createMutation } from "./createMutation";
 export { createRef } from "inferno";
 export { createView } from "./createView";
-export { batch } from "./observation";
+
+export function render(...params: Parameters<typeof infernoRender>) {
+  installEventBatching();
+  return infernoRender(...params);
+}

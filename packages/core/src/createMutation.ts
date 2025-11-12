@@ -1,5 +1,4 @@
 import { createState } from "./createState";
-import { batch } from "./observation";
 
 type MutationState<T> =
   | {
@@ -75,12 +74,10 @@ export function createMutation<T>(
 
       const abortController = (currentAbortController = new AbortController());
 
-      batch(() => {
-        assign({
-          isPending: true,
-          params,
-          error: null,
-        });
+      assign({
+        isPending: true,
+        params,
+        error: null,
       });
 
       mutator(params)
@@ -89,12 +86,10 @@ export function createMutation<T>(
             return;
           }
 
-          batch(() => {
-            assign({
-              isPending: false,
-              params: null,
-              error: null,
-            });
+          assign({
+            isPending: false,
+            params: null,
+            error: null,
           });
         })
         .catch((error) => {
@@ -102,12 +97,10 @@ export function createMutation<T>(
             return;
           }
 
-          batch(() => {
-            assign({
-              isPending: false,
-              params: null,
-              error: String(error),
-            });
+          assign({
+            isPending: false,
+            params: null,
+            error: String(error),
           });
         });
     },
