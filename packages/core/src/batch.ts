@@ -25,7 +25,9 @@ const INTERACTIVE_EVENTS = [
 
 let inInteractive = 0;
 let hasAsyncQueue = false;
+let hasSyncQueue = false;
 const flushQueue = new Set<() => void>();
+const syncFlushQueue = new Set<() => void>();
 
 function queueAsync() {
   if (hasAsyncQueue) {
@@ -48,13 +50,25 @@ function queueAsync() {
 }
 
 export function queue(cb: () => void) {
-  flushQueue.add(cb);
+  if (hasSyncQueue) {
+    syncFlushQueue.add(cb);
+    return;
+  }
 
-  console.log(inInteractive);
+  flushQueue.add(cb);
 
   if (!inInteractive) {
     queueAsync();
   }
+}
+
+export function syncBatch(cb: () => void) {
+  hasSyncQueue = true;
+  cb();
+  hasSyncQueue = false;
+  const queued = Array.from(syncFlushQueue);
+  syncFlushQueue.clear();
+  queued.forEach((cb) => cb());
 }
 
 export function installEventBatching(target: EventTarget = document) {

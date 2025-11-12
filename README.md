@@ -234,6 +234,7 @@ Reactive objects are implemented using JavaScript Proxies. When you access a pro
 - `createQuery()` - Never destructure query objects
 - `createMutation()` - Never destructure mutation objects
 - `createView()` - Never destructure view objects
+- `createComputed()` - Never destructure computed objects
 
 ## API Reference
 
@@ -372,6 +373,175 @@ function Example() {
 **Usage:**
 
 Pass the ref to an element's `ref` prop. The `current` property will be set to the DOM element when mounted and `null` when unmounted.
+
+---
+
+### Reactivity Primitives
+
+#### `createEffect(callback)`
+
+Creates an effect that automatically tracks reactive dependencies and re-runs whenever they change. The effect runs immediately on creation.
+
+```tsx
+import { createEffect, createState } from "rask-ui";
+
+function Timer() {
+  const state = createState({ count: 0, log: [] });
+
+  // Effect runs immediately and whenever state.count changes
+  createEffect(() => {
+    console.log("Count changed:", state.count);
+    state.log.push(`Count: ${state.count}`);
+  });
+
+  return () => (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => state.count++}>Increment</button>
+      <ul>
+        {state.log.map((entry, i) => (
+          <li key={i}>{entry}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+**Parameters:**
+
+- `callback: () => void` - Function to run when dependencies change
+
+**Features:**
+
+- Runs immediately on creation
+- Automatically tracks reactive dependencies accessed during execution
+- Re-runs on microtask when dependencies change (prevents synchronous cascades)
+- Automatically cleaned up when component unmounts
+- Can be used for side effects like logging, syncing to localStorage, or updating derived state
+
+**Notes:**
+
+- Only call during component setup phase (not in render function)
+- Effects are queued on microtask to avoid synchronous execution from prop changes
+- Be careful with effects that modify state - can cause infinite loops if not careful
+
+---
+
+#### `createComputed<T>(computed)`
+
+Creates an object with computed properties that automatically track dependencies and cache results until dependencies change.
+
+```tsx
+import { createComputed, createState } from "rask-ui";
+
+function ShoppingCart() {
+  const state = createState({
+    items: [
+      { id: 1, name: "Apple", price: 1.5, quantity: 3 },
+      { id: 2, name: "Banana", price: 0.8, quantity: 5 },
+    ],
+    taxRate: 0.2,
+  });
+
+  const computed = createComputed({
+    subtotal: () =>
+      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    tax: () => computed.subtotal * state.taxRate,
+    total: () => computed.subtotal + computed.tax,
+    itemCount: () =>
+      state.items.reduce((sum, item) => sum + item.quantity, 0),
+  });
+
+  return () => (
+    <div>
+      <h2>Cart ({computed.itemCount} items)</h2>
+      <ul>
+        {state.items.map((item) => (
+          <li key={item.id}>
+            {item.name}: ${item.price} x {item.quantity}
+            <button onClick={() => item.quantity++}>+</button>
+            <button onClick={() => item.quantity--}>-</button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <p>Subtotal: ${computed.subtotal.toFixed(2)}</p>
+        <p>Tax ({state.taxRate * 100}%): ${computed.tax.toFixed(2)}</p>
+        <p>
+          <strong>Total: ${computed.total.toFixed(2)}</strong>
+        </p>
+      </div>
+    </div>
+  );
+}
+```
+
+**Parameters:**
+
+- `computed: T` - Object where each property is a function returning a computed value
+
+**Returns:** Reactive object with cached computed properties
+
+**Features:**
+
+- **Lazy evaluation** - Computed values are only calculated when accessed
+- **Automatic caching** - Results are cached until dependencies change
+- **Dependency tracking** - Automatically tracks what state each computed depends on
+- **Composable** - Computed properties can depend on other computed properties
+- **Efficient** - Only recomputes when dirty (dependencies changed)
+- **Automatic cleanup** - Cleaned up when component unmounts
+
+**Notes:**
+
+- Access computed properties directly (e.g., `computed.total`), don't call as functions
+- Computed properties are getters, not functions
+- **Do not destructure** - Breaks reactivity (see warning section above)
+- Only call during component setup phase
+
+---
+
+### Automatic Batching
+
+RASK automatically batches state updates to minimize re-renders. This happens transparently without any special syntax.
+
+**How it works:**
+
+- **User interactions** (clicks, inputs, keyboard, etc.) - State changes are batched and flushed synchronously at the end of the event
+- **Other updates** (setTimeout, fetch callbacks, etc.) - State changes are batched and flushed on the next microtask
+
+```tsx
+function BatchingExample() {
+  const state = createState({ count: 0, clicks: 0 });
+
+  const handleClick = () => {
+    // All three updates are batched into a single render
+    state.count++;
+    state.clicks++;
+    state.count++;
+    // UI updates once with count=2, clicks=1
+  };
+
+  const handleAsync = () => {
+    setTimeout(() => {
+      // These updates are also batched (async batch)
+      state.count++;
+      state.clicks++;
+      // UI updates once on next microtask
+    }, 100);
+  };
+
+  return () => (
+    <div>
+      <p>
+        Count: {state.count}, Clicks: {state.clicks}
+      </p>
+      <button onClick={handleClick}>Sync Update</button>
+      <button onClick={handleAsync}>Async Update</button>
+    </div>
+  );
+}
+```
 
 ---
 
@@ -726,7 +896,9 @@ Keys prevent component recreation when list order changes.
 
 ### Computed Values
 
-Create computed values using functions in setup:
+You can create computed values in two ways:
+
+**1. Simple computed functions** - For basic derived values:
 
 ```tsx
 function ShoppingCart() {
@@ -756,6 +928,48 @@ function ShoppingCart() {
 ```
 
 Computed functions automatically track dependencies when called during render.
+
+**2. Using `createComputed`** - For cached, efficient computed values with automatic dependency tracking:
+
+```tsx
+function ShoppingCart() {
+  const state = createState({
+    items: [
+      { id: 1, price: 10, quantity: 2 },
+      { id: 2, price: 20, quantity: 1 },
+    ],
+    taxRate: 0.1,
+  });
+
+  const computed = createComputed({
+    subtotal: () =>
+      state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    tax: () => computed.subtotal * state.taxRate,
+    total: () => computed.subtotal + computed.tax,
+  });
+
+  return () => (
+    <div>
+      <ul>
+        {state.items.map((item) => (
+          <li key={item.id}>
+            ${item.price} x {item.quantity}
+          </li>
+        ))}
+      </ul>
+      <p>Subtotal: ${computed.subtotal}</p>
+      <p>Tax: ${computed.tax}</p>
+      <p>Total: ${computed.total}</p>
+    </div>
+  );
+}
+```
+
+Benefits of `createComputed`:
+- **Cached** - Only recalculates when dependencies change
+- **Lazy** - Only calculates when accessed
+- **Composable** - Computed properties can depend on other computed properties
+- **Efficient** - Better performance for expensive calculations
 
 ### Composition
 
