@@ -26,21 +26,76 @@ impl RaskComponentTransform {
         }
     }
 
-    /// Check if an expression contains a VNode-related call
+    /// Check if an expression contains a VNode-related call (recursive deep search)
     fn has_vnode_call(&self, expr: &Expr) -> bool {
         match expr {
+            // Direct VNode call - this is what we're looking for
             Expr::Call(call) => {
                 if let Callee::Expr(callee_expr) = &call.callee {
                     if let Expr::Ident(ident) = &**callee_expr {
-                        return ident.sym.as_ref() == "createVNode"
+                        if ident.sym.as_ref() == "createVNode"
                             || ident.sym.as_ref() == "createComponentVNode"
                             || ident.sym.as_ref() == "createFragment"
-                            || ident.sym.as_ref() == "createTextVNode";
+                            || ident.sym.as_ref() == "createTextVNode"
+                        {
+                            return true;
+                        }
+                    }
+                }
+                // Check arguments - important for .map(...), .filter(...), etc.
+                for arg in &call.args {
+                    if self.has_vnode_call(&arg.expr) {
+                        return true;
                     }
                 }
                 false
             }
+            // Parenthesized expressions
             Expr::Paren(paren) => self.has_vnode_call(&paren.expr),
+
+            // Conditional (ternary): condition ? consequent : alternate
+            Expr::Cond(cond) => {
+                self.has_vnode_call(&cond.cons) || self.has_vnode_call(&cond.alt)
+            }
+
+            // Logical: expr1 && expr2, expr1 || expr2
+            Expr::Bin(bin) => {
+                self.has_vnode_call(&bin.left) || self.has_vnode_call(&bin.right)
+            }
+
+            // Arrays: [expr1, expr2, ...]
+            Expr::Array(arr) => {
+                arr.elems.iter().any(|elem| {
+                    elem.as_ref()
+                        .map(|e| self.has_vnode_call(&e.expr))
+                        .unwrap_or(false)
+                })
+            }
+
+            // Arrow functions: (args) => body
+            Expr::Arrow(arrow) => match &*arrow.body {
+                BlockStmtOrExpr::Expr(expr) => self.has_vnode_call(expr),
+                BlockStmtOrExpr::BlockStmt(block) => {
+                    for stmt in &block.stmts {
+                        if let Stmt::Return(ret) = stmt {
+                            if let Some(arg) = &ret.arg {
+                                if self.has_vnode_call(arg) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    false
+                }
+            },
+
+            // Member expressions: obj.method()
+            Expr::Member(member) => self.has_vnode_call(&member.obj),
+
+            // Unary expressions: !expr, +expr, etc.
+            Expr::Unary(unary) => self.has_vnode_call(&unary.arg),
+
+            // JSX/Fragments - already transformed by Inferno plugin, so we won't see these
             _ => false,
         }
     }

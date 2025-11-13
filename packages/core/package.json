@@ -1,6 +1,6 @@
 {
   "name": "rask-ui",
-  "version": "0.4.3",
+  "version": "0.5.1",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -28,7 +28,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && cp ../../README.md .",
+    "build": "npm run build:plugin && tsc && cp ../../README.md .",
+    "build:plugin": "cd swc-plugin && cargo build --release --target wasm32-wasip1",
     "dev": "tsc --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",

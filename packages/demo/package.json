@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "inferno": "^9.0.4",
     "rask-ui": "workspace:*"
   },
   "devDependencies": {

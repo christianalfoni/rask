@@ -48,6 +48,9 @@ importers:
 
   packages/demo:
     dependencies:
+      inferno:
+        specifier: ^9.0.4
+        version: 9.0.4
       rask-ui:
         specifier: workspace:*
         version: link:../core
