@@ -1,0 +1,8 @@
+cargo:rustc-env=VERGEN_CARGO_DEBUG=false
+cargo:rustc-env=VERGEN_CARGO_FEATURES=common,common_plugin_transform,ecma_ast,ecma_plugin_transform,ecma_utils,ecma_visit,swc_atoms,swc_common,swc_ecma_ast,swc_ecma_transforms_base,swc_ecma_transforms_testing,swc_ecma_utils,swc_ecma_visit,swc_plugin,swc_plugin_macro,swc_plugin_proxy,transform_common,__common,__common_plugin_transform,__ecma,__ecma_plugin_transform,__plugin_transform_schema_v1,__testing_transform,__utils,__visit
+cargo:rustc-env=VERGEN_CARGO_OPT_LEVEL=z
+cargo:rustc-env=VERGEN_CARGO_TARGET_TRIPLE=wasm32-wasip1
+cargo:rustc-env=VERGEN_CARGO_DEPENDENCIES=anyhow 1.0.100,swc_allocator 4.0.1,testing 18.0.0,vergen 9.0.0
+cargo:rerun-if-changed=build.rs
+cargo:rerun-if-env-changed=VERGEN_IDEMPOTENT
+cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH

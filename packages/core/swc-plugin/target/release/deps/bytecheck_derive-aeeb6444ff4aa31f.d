@@ -1,0 +1,8 @@
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/release/deps/bytecheck_derive-aeeb6444ff4aa31f.d: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/attributes.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/repr.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/util.rs
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/release/deps/libbytecheck_derive-aeeb6444ff4aa31f.dylib: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/attributes.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/repr.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/util.rs
+
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/lib.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/attributes.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/repr.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytecheck_derive-0.8.2/src/util.rs:

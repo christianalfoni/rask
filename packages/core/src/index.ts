@@ -1,5 +1,5 @@
 export { render } from "./render";
-export { onCleanup, onMount } from "./component";
+export { onCleanup, onMount, RaskComponent } from "./component";
 export { createContext } from "./createContext";
 export { createState } from "./createState";
 export { createAsync } from "./createAsync";

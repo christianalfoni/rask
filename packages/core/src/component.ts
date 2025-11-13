@@ -40,9 +40,8 @@ export type RaskFunctionComponent<P extends Props<any>> =
   | (() => () => VNode)
   | ((props: P) => () => VNode);
 
-class RaskComponent<P extends Props<any>> extends Component<
-  P & { __component: RaskFunctionComponent<P> }
-> {
+export class RaskComponent<P extends Props<any>> extends Component<P> {
+  declare setup: RaskFunctionComponent<P>;
   private renderFn?: () => VNode;
   private reactiveProps?: Props<any>;
   private observer = new Observer(() => {
@@ -74,7 +73,6 @@ class RaskComponent<P extends Props<any>> extends Component<
       // Skip known non-reactive props
       if (
         typeof value === "function" ||
-        prop === "__component" ||
         prop === "children" ||
         prop === "key" ||
         prop === "ref"
@@ -135,7 +133,7 @@ class RaskComponent<P extends Props<any>> extends Component<
   componentWillUpdate(nextProps: any) {
     syncBatch(() => {
       for (const prop in nextProps) {
-        if (prop === "__component" || prop === "children") {
+        if (prop === "children") {
           continue;
         }
 
@@ -165,7 +163,7 @@ class RaskComponent<P extends Props<any>> extends Component<
       this.reactiveProps = this.createReactiveProps();
       currentComponent = this;
       try {
-        this.renderFn = this.props.__component(this.reactiveProps as any);
+        this.renderFn = this.setup(this.reactiveProps as any);
 
         if (typeof this.renderFn !== "function") {
           throw new Error("Component must return a render function");

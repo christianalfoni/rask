@@ -16,14 +16,19 @@
     "./jsx-dev-runtime": {
       "types": "./dist/jsx-dev-runtime.d.ts",
       "import": "./dist/jsx-dev-runtime.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js"
     }
   },
   "files": [
     "dist",
+    "swc-plugin",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && cp src/jsx.d.ts dist/ && cp ../../README.md .",
+    "build": "tsc && cp ../../README.md .",
     "dev": "tsc --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -37,7 +42,17 @@
     "vitest": "^4.0.7"
   },
   "dependencies": {
+    "@swc/core": "^1.9.2",
     "inferno": "^9.0.4",
-    "inferno-vnode-flags": "^9.0.4"
+    "inferno-vnode-flags": "^9.0.4",
+    "swc-plugin-inferno": "^2.9.0"
+  },
+  "peerDependencies": {
+    "vite": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
   }
 }

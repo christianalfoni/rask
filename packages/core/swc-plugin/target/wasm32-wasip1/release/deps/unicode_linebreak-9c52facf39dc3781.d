@@ -1,0 +1,9 @@
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/unicode_linebreak-9c52facf39dc3781.d: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/shared.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/tables.rs
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libunicode_linebreak-9c52facf39dc3781.rlib: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/shared.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/tables.rs
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libunicode_linebreak-9c52facf39dc3781.rmeta: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/shared.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/tables.rs
+
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/lib.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/shared.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-linebreak-0.1.5/src/tables.rs:

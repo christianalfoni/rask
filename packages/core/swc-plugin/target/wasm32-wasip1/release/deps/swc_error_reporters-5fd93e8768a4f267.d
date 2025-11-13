@@ -1,0 +1,9 @@
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/swc_error_reporters-5fd93e8768a4f267.d: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/diagnostic.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/handler.rs
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libswc_error_reporters-5fd93e8768a4f267.rlib: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/diagnostic.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/handler.rs
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libswc_error_reporters-5fd93e8768a4f267.rmeta: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/diagnostic.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/handler.rs
+
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/lib.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/diagnostic.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/swc_error_reporters-19.0.0/src/handler.rs:

@@ -1,0 +1,1 @@
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/swc_plugin_rask_component.wasm: /Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/src/lib.rs

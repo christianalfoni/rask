@@ -1,0 +1,1 @@
+{"rustc":17575471286409424799,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[966925859616469517,"build_script_build",false,12540067172347084148]],"local":[{"RerunIfChanged":{"output":"wasm32-wasip1/release/build/ahash-8d4f2d4f00ef6e6d/output","paths":["build.rs"]}}],"rustflags":["-C","link-arg=-zstack-size=1048576"],"config":0,"compile_kind":0}

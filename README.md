@@ -74,18 +74,73 @@ RASK gives you:
 npm install rask-ui
 ```
 
-### Configuration
+### Vite Setup
 
-Configure TypeScript to use RASK's JSX runtime:
+RASK uses a custom Vite plugin powered by SWC for optimal JSX transformation. This plugin transforms JSX to Inferno's highly optimized `createVNode` calls and automatically converts function components to RASK's reactive component pattern.
+
+#### 1. Configure Vite
+
+Create or update your `vite.config.ts`:
+
+```ts
+import { defineConfig } from 'vite';
+import { raskPlugin } from 'rask-ui/plugin';
+
+export default defineConfig({
+  plugins: [raskPlugin()],
+});
+```
+
+**Plugin Options:**
+
+```ts
+raskPlugin({
+  // Enable/disable function component transformation
+  // Default: true
+  transformComponents: true,
+
+  // Add imports for Inferno utilities (usually not needed)
+  // Default: false
+  imports: false,
+
+  // Package to import from when transformComponents is enabled
+  // Default: "rask-ui"
+  importSource: "rask-ui",
+
+  // Define all arguments for createVNode (for debugging)
+  // Default: false
+  defineAllArguments: false,
+})
+```
+
+#### 2. Configure TypeScript
+
+Update your `tsconfig.json`:
 
 ```json
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "rask-ui"
+    "jsxImportSource": "rask-ui",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   }
 }
 ```
+
+**Key settings:**
+
+- `"jsx": "react-jsx"` - Tells TypeScript to use the new JSX transform for type checking
+- `"jsxImportSource": "rask-ui"` - Points to RASK's JSX runtime for type definitions
+- `"moduleResolution": "bundler"` - Required for Vite
+
+**How it works:**
+
+- **TypeScript**: Type-checks JSX using RASK's type definitions (imported from Inferno)
+- **SWC Plugin**: Transforms JSX to Inferno's `createVNode` calls at build time
+- The result: You get full type safety with zero runtime overhead
 
 ### Basic Example
 

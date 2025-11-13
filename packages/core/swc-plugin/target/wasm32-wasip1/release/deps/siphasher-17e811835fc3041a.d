@@ -1,0 +1,10 @@
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/siphasher-17e811835fc3041a.d: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip128.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/../README.md
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libsiphasher-17e811835fc3041a.rlib: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip128.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/../README.md
+
+/Users/christianalfoni/Development/snabbdom-components/packages/core/swc-plugin/target/wasm32-wasip1/release/deps/libsiphasher-17e811835fc3041a.rmeta: /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/lib.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip128.rs /Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/../README.md
+
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/lib.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/sip128.rs:
+/Users/christianalfoni/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/siphasher-1.0.1/src/../README.md:
